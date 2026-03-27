@@ -14,41 +14,119 @@ export const resolveProductByScan = query({
     barcode:   v.string(),
     batchCode: v.optional(v.string()),
   },
-  handler: async (ctx, { barcode, batchCode }) => {
-    const barcodeNorm = normalizeBarcode(barcode);
+  handler: async (_ctx, { barcode }) => {
+    // MOCK — always return Nutella regardless of scanned barcode
+    // TODO: swap in real DB lookup when catalog is populated
+    // const barcodeNorm = normalizeBarcode(barcode);
+    // const codeEntry = await ctx.db.query("productCodes")
+    //   .withIndex("by_code", q => q.eq("codeNormalized", barcodeNorm)).first();
+    // if (!codeEntry) return { resolutionStatus: "not_found" as const, barcode: barcodeNorm };
+    // ...
 
-    const codeEntry = await ctx.db
-      .query("productCodes")
-      .withIndex("by_code", (q) => q.eq("codeNormalized", barcodeNorm))
-      .first();
-
-    if (!codeEntry) {
-      return { resolutionStatus: "not_found" as const, barcode: barcodeNorm };
-    }
-
-    const product = await ctx.db.get(codeEntry.productId);
-    if (!product) return { resolutionStatus: "not_found" as const, barcode: barcodeNorm };
-
-    const producer = await ctx.db.get(product.producerId);
-    if (!producer) return { resolutionStatus: "not_found" as const, barcode: barcodeNorm };
-
-    let batch = null;
-    if (batchCode) {
-      const batchNorm = normalizeBatchCode(batchCode);
-      batch = await ctx.db
-        .query("productBatches")
-        .withIndex("by_product_and_batch", (q) =>
-          q.eq("productId", product._id).eq("batchCodeNormalized", batchNorm),
-        )
-        .first();
-    }
+    void barcode;
 
     return {
-      resolutionStatus: (batch ? "found" : batchCode ? "found_no_batch" : "found") as
-        "found" | "found_no_batch",
-      product,
-      producer,
-      batch: batch ?? null,
+      resolutionStatus: "found" as const,
+      product: {
+        _id:                  "mock_nutella" as any,
+        producerId:           "mock_ferrero" as any,
+        title:                "Nutella",
+        subtitle:             "Hazelnut & Cocoa Spread",
+        brandLabel:           "Ferrero",
+        thumbnailUrl:         "https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.820.400.jpg",
+        imageUrls:            ["https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.820.400.jpg"],
+        category:             "Spreads",
+        subcategories:        ["Chocolate Spreads", "Hazelnut Spreads"],
+        description:          "The original hazelnut cocoa spread. Made with quality ingredients since 1964.",
+        netContent:           { value: 400, unit: "g" },
+        originCountries:      ["IT"],
+        marketCountries:      ["IT", "DE", "FR", "GB", "US", "CH"],
+        status:               "active" as const,
+        dataSource:           "barcode_api" as const,
+        dataQuality:          "high" as const,
+        primaryCodeNormalized:"3017620422003",
+        ingredientsText:      "Sugar, palm oil, hazelnuts 13%, fat-reduced cocoa 7.4%, skimmed milk powder 6.6%, whey powder, emulsifier: lecithins (soya), vanillin.",
+        ingredients: [
+          { name: "Sugar",                   percent: 56.3, isOrganic: false },
+          { name: "Palm oil",                           isOrganic: false, isPalmOil: true },
+          { name: "Hazelnuts",               percent: 13,   isOrganic: false },
+          { name: "Fat-reduced cocoa",       percent: 7.4,  isOrganic: false },
+          { name: "Skimmed milk powder",     percent: 6.6,  isOrganic: false },
+          { name: "Whey powder",                        isOrganic: false },
+          { name: "Lecithins (soya)",                   isOrganic: false },
+          { name: "Vanillin",                           isOrganic: false },
+        ],
+        allergens: {
+          contains:   ["milk", "nuts", "soya"],
+          mayContain: [],
+          freeFrom:   ["gluten"],
+        },
+        additives: [
+          { code: "E322", name: "Lecithins", riskLevel: "low" as const },
+        ],
+        labels:  ["vegetarian"],
+        qualityScores: {
+          nutriScore:        "E" as const,
+          novaGroup:         4 as const,
+          processingLevel:   "Ultra-processed",
+          additiveRiskScore: 1,
+          overallFoodScore:  28,
+        },
+        nutrition: {
+          referenceBasis: "100g" as const,
+          per100: {
+            energyKcal:   539,
+            energyKj:     2252,
+            fat:          30.9,
+            saturatedFat: 10.6,
+            carbs:        57.5,
+            sugars:       56.3,
+            fiber:        1.4,
+            protein:       6.3,
+            salt:          0.107,
+            calcium:       80,
+            iron:           2.4,
+          },
+        },
+        packaging: {
+          type:       "Jar",
+          material:   "Glass",
+          recyclable: true,
+          weightG:    400,
+        },
+        lastVerifiedAt: Date.now(),
+        createdAt:      Date.now(),
+        updatedAt:      Date.now(),
+      },
+      producer: {
+        _id:                "mock_ferrero" as any,
+        name:               "Ferrero SpA",
+        displayName:        "Ferrero",
+        slug:               "ferrero",
+        roles:              ["manufacturer", "brand_owner"] as any,
+        website:            "https://www.ferrero.com",
+        countryCode:        "IT",
+        gs1CompanyPrefix:   "3017620",
+        verificationStatus: "verified" as const,
+        createdAt:          Date.now(),
+        updatedAt:          Date.now(),
+      },
+      batch: {
+        _id:                 "mock_batch_1" as any,
+        productId:           "mock_nutella" as any,
+        producerId:          "mock_ferrero" as any,
+        batchCodeRaw:        "L240901B",
+        batchCodeNormalized: "L240901B",
+        manufacturedAt:      new Date("2024-09-01").getTime(),
+        bestBeforeAt:        new Date("2025-09-01").getTime(),
+        originCountry:       "IT",
+        destinationMarket:   "EU",
+        facilityCode:        "FERRERO-ALBA-01",
+        status:              "active" as const,
+        recallStatus:        "none" as const,
+        createdAt:           Date.now(),
+        updatedAt:           Date.now(),
+      },
     };
   },
 });

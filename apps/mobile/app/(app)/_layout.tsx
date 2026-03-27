@@ -1,11 +1,59 @@
+import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { View, StyleSheet } from "react-native";
+import { SymbolView } from "expo-symbols";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function ScanTabIcon({ color, focused }: { color: string; focused: boolean }) {
+const TAB_CONFIG = [
+  { name: "index",   symbol: "globe",                label: "Globe"   },
+  { name: "scan",    symbol: "barcode.viewfinder",   label: "Scan"    },
+  { name: "profile", symbol: "person.crop.circle",   label: "Profile" },
+] as const;
+
+function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={[styles.scanIcon, focused && styles.scanIconActive]}>
-      <Ionicons name="barcode-outline" size={22} color={focused ? "#fff" : "#636366"} />
+    <View style={[s.barWrapper, { paddingBottom: insets.bottom + 8 }]}>
+      <View style={s.barOuter}>
+        <BlurView
+          intensity={Platform.OS === "ios" ? 70 : 100}
+          tint="systemChromeMaterialDark"
+          style={s.blurFill}
+        />
+        <View style={s.barInner}>
+          {state.routes.map((route, idx) => {
+            const cfg = TAB_CONFIG[idx];
+            const focused = state.index === idx;
+            const { options } = descriptors[route.key];
+            const onPress = () => {
+              const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+              if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+            };
+
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={s.tabItem}
+                accessibilityLabel={options.tabBarAccessibilityLabel}
+              >
+                {focused && <View style={s.activePill} />}
+                <SymbolView
+                  name={cfg.symbol}
+                  style={s.symbol}
+                  type="hierarchical"
+                  tintColor={focused ? "#FFFFFF" : "#636366"}
+                />
+                <Text style={[s.label, focused && s.labelActive]}>
+                  {cfg.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 }
@@ -13,70 +61,68 @@ function ScanTabIcon({ color, focused }: { color: string; focused: boolean }) {
 export default function AppLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "#1C1C1E",
-          borderTopColor: "#38383A",
-          borderTopWidth: 0.5,
-          height: 84,
-          paddingBottom: 28,
-          paddingTop: 10,
-        },
-        tabBarActiveTintColor: "#0A84FF",
-        tabBarInactiveTintColor: "#636366",
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "500",
-        },
-      }}
+      tabBar={(props) => <GlassTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Globe",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "globe" : "globe-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          title: "Scan",
-          tabBarIcon: ({ color, focused }) => (
-            <ScanTabIcon color={color} focused={focused} />
-          ),
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontWeight: "500",
-            color: "#636366",
-          },
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
-          ),
-        }}
-      />
+      <Tabs.Screen name="index"   />
+      <Tabs.Screen name="scan"    />
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }
 
-const styles = StyleSheet.create({
-  scanIcon: {
-    width: 44,
-    height: 30,
-    borderRadius: 10,
-    backgroundColor: "#2C2C2E",
+const s = StyleSheet.create({
+  barWrapper: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  barOuter: {
+    width: "100%",
+    borderRadius: 28,
+    overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+  blurFill: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  barInner: {
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    gap: 4,
+    backgroundColor: Platform.OS === "android" ? "rgba(28,28,30,0.92)" : "rgba(28,28,30,0.4)",
+  },
+  tabItem: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 8,
+    gap: 4,
+    borderRadius: 20,
+    position: "relative",
   },
-  scanIconActive: {
-    backgroundColor: "#0A84FF",
+  activePill: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 20,
+  },
+  symbol: {
+    width: 24,
+    height: 24,
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: "500",
+    color: "#636366",
+    letterSpacing: 0.2,
+  },
+  labelActive: {
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
 });
