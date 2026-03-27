@@ -115,10 +115,7 @@ export default function ScanScreen() {
           </View>
         </View>
 
-        {/* Bottom hint */}
-        <SafeAreaView edges={["bottom"]}>
-          <Text style={styles.hint}>EAN-13 · EAN-8 · UPC-A · QR</Text>
-        </SafeAreaView>
+        <SafeAreaView edges={["bottom"]} />
       </View>
     </View>
   );

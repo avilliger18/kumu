@@ -13,7 +13,7 @@ export default function TabLayout() {
   return (
     <NativeTabs minimizeBehavior="onScrollDown">
       <NativeTabs.Trigger
-        name="index"
+        name="overview"
         options={{
           title: "Overview",
           icon: { sf: "house.fill", drawable: "home" },
