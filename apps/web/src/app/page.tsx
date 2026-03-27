@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@kumu/backend/convex/_generated/api";
@@ -64,6 +64,65 @@ export default function SupplyChainGlobe() {
   const producer =
     scanResult?.resolutionStatus === "found" ? scanResult.producer : null;
   const nutrition = product?.nutrition?.per100;
+
+  const globeRef = useRef<any>(null);
+
+  const steps = scanResult?.supplyChainSteps ?? [];
+
+  // Build arc data: each origin step → the factory step
+  const factoryStep = steps.find((s) => s.type === "factory");
+  const distStep = steps.find((s) => s.type === "distribution");
+  const supplyArcs = useMemo(() => {
+    if (!factoryStep) return [];
+    const origins = steps.filter(
+      (s) => s.type !== "factory" && s.type !== "distribution",
+    );
+    const arcs = origins.map((o) => ({
+      startLat: o.lat,
+      startLng: o.lng,
+      endLat: factoryStep.lat,
+      endLng: factoryStep.lng,
+    }));
+    if (distStep) {
+      arcs.push({
+        startLat: factoryStep.lat,
+        startLng: factoryStep.lng,
+        endLat: distStep.lat,
+        endLng: distStep.lng,
+      });
+    }
+    return arcs;
+  }, [steps, factoryStep, distStep]);
+
+  const STEP_EMOJI: Record<string, string> = {
+    plantation: "🌿",
+    farm: "🌾",
+    factory: "🏭",
+    distribution: "📦",
+    processing: "⚙️",
+  };
+
+  const supplyPoints = useMemo(
+    () =>
+      steps.map((s) => ({
+        ...s,
+        emoji: STEP_EMOJI[s.type] ?? "📍",
+      })),
+    [steps],
+  );
+
+  // Auto-fly globe to frame the supply chain when product loads
+  useEffect(() => {
+    if (!globeRef.current || steps.length === 0) return;
+    const lats = steps.map((s) => s.lat);
+    const lngs = steps.map((s) => s.lng);
+    const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+    globeRef.current.pointOfView(
+      { lat: centerLat, lng: centerLng, altitude: 2.2 },
+      1800,
+    );
+  }, [steps.length]);
 
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-slate-100 text-slate-900">
@@ -208,7 +267,7 @@ export default function SupplyChainGlobe() {
 
                   <Card className="relative overflow-hidden shadow-md">
                     <div
-                      className="pointer-events-none absolute -bottom-8 -right-8 z-0 opacity-60 -rotate-12"
+                      className="pointer-events-none absolute -bottom-8 -right-4 z-0 -rotate-20"
                       aria-hidden
                     >
                       <Image
@@ -221,7 +280,7 @@ export default function SupplyChainGlobe() {
                     </div>
                     <CardContent className="relative z-10 p-6 pb-12">
                       <h4 className="font-heading text-2xl">Ingredients</h4>
-                      <ul className="list-disc pl-5 pr-32">
+                      <ul className="list-disc pl-5 pr-32 pb-6">
                         {product.ingredients.length > 0 ? (
                           product.ingredients.map((ingredient, index) => (
                             <li key={`${ingredient.name}-${index}`}>
@@ -294,12 +353,68 @@ export default function SupplyChainGlobe() {
 
           <div className="absolute inset-x-0 bottom-0 flex h-[70vh] items-end justify-center">
             <Globe
+              ref={globeRef}
               width={Math.round(viewport.width * (showInfoBox ? 0.6 : 1))}
               height={viewport.height}
               globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
               backgroundColor="rgba(0,0,0,0)"
-              pointsData={[]}
-              arcsData={[]}
+              // supply chain arcs
+              arcsData={supplyArcs}
+              arcStartLat={(d: any) => d.startLat}
+              arcStartLng={(d: any) => d.startLng}
+              arcEndLat={(d: any) => d.endLat}
+              arcEndLng={(d: any) => d.endLng}
+              arcColor={() => "#ff459f"}
+              arcAltitude={0.35}
+              arcStroke={1.2}
+              arcDashLength={0.4}
+              arcDashGap={0.25}
+              arcDashAnimateTime={2200}
+              // supply chain markers
+              htmlElementsData={supplyPoints}
+              htmlLat={(d: any) => d.lat}
+              htmlLng={(d: any) => d.lng}
+              htmlAltitude={0.01}
+              htmlElement={(d: any) => {
+                const el = document.createElement("div");
+                el.style.cssText = `
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: 4px;
+                  cursor: default;
+                  user-select: none;
+                `;
+                const badge = document.createElement("div");
+                badge.style.cssText = `
+                  width: 36px;
+                  height: 36px;
+                  border-radius: 50%;
+                  background: white;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 18px;
+                  box-shadow: 0 4px 14px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2);
+                  border: 2px solid ${d.type === "factory" ? "#ff459f" : d.type === "distribution" ? "#6366f1" : "#22c55e"};
+                `;
+                badge.textContent = d.emoji;
+                const label = document.createElement("div");
+                label.style.cssText = `
+                  background: rgba(0,0,0,0.72);
+                  color: white;
+                  font-size: 10px;
+                  font-weight: 600;
+                  padding: 2px 6px;
+                  border-radius: 6px;
+                  white-space: nowrap;
+                  letter-spacing: 0.02em;
+                `;
+                label.textContent = d.label;
+                el.appendChild(badge);
+                el.appendChild(label);
+                return el;
+              }}
             />
           </div>
         </section>

@@ -1,38 +1,37 @@
-import { type Href, Link } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { PlatformColor, Pressable, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, View } from "react-native";
+import { ios26Colors } from "@/constants/ios26";
 
 type ModalCloseButtonProps = {
-  href?: Href;
   backgroundColor?: string;
 };
 
 export default function ModalCloseButton({
-  href = "..",
   backgroundColor = "#2C2C2E",
 }: ModalCloseButtonProps) {
+  const router = useRouter();
+
   return (
-    <Link href={href} asChild>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Close modal"
-        style={({ pressed }) => [
-          styles.button,
-          { backgroundColor },
-          pressed && styles.pressed,
-        ]}
-      >
-        <View style={styles.iconWrap}>
-          <Ionicons
-            name="close"
-            size={18}
-            color={PlatformColor("label") as unknown as string}
-          />
-        </View>
-      </Pressable>
-    </Link>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Close modal"
+      onPress={() => router.dismiss()}
+      style={({ pressed }) => [
+        styles.button,
+        { backgroundColor },
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={styles.icon}>
+        <View style={[styles.line, styles.lineA]} />
+        <View style={[styles.line, styles.lineB]} />
+      </View>
+    </Pressable>
   );
 }
+
+const LINE_LENGTH = 16;
+const LINE_THICKNESS = 2.25;
 
 const styles = StyleSheet.create({
   button: {
@@ -45,10 +44,23 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.75,
   },
-  iconWrap: {
-    width: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
+  icon: {
+    width: LINE_LENGTH,
+    height: LINE_LENGTH,
+  },
+  line: {
+    position: "absolute",
+    width: LINE_LENGTH,
+    height: LINE_THICKNESS,
+    borderRadius: 999,
+    backgroundColor: ios26Colors.textPrimary,
+    top: (LINE_LENGTH - LINE_THICKNESS) / 2,
+    left: 0,
+  },
+  lineA: {
+    transform: [{ rotate: "45deg" }],
+  },
+  lineB: {
+    transform: [{ rotate: "-45deg" }],
   },
 });

@@ -1,12 +1,12 @@
 import { Link } from "expo-router";
 import {
   Image,
-  PlatformColor,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
 type ScanHistoryItemProps = {
   barcode: string;
@@ -60,26 +60,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    borderRadius: 18,
+    borderRadius: ios26Radii.card,
     padding: 12,
-    backgroundColor: PlatformColor("secondarySystemGroupedBackground"),
+    backgroundColor: ios26Colors.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: ios26Colors.separator,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: 0.75,
   },
   image: {
     width: 54,
     height: 54,
     borderRadius: 14,
     resizeMode: "cover",
-    backgroundColor: PlatformColor("tertiarySystemGroupedBackground"),
+    backgroundColor: ios26Colors.surfaceElevated,
   },
   imageFallback: {
     alignItems: "center",
     justifyContent: "center",
   },
   fallbackText: {
-    color: PlatformColor("tertiaryLabel"),
+    color: ios26Colors.textMuted,
     fontSize: 20,
     fontWeight: "700",
   },
@@ -88,16 +90,16 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    color: PlatformColor("label"),
-    fontSize: 17,
+    color: ios26Colors.textPrimary,
+    fontSize: 16,
     fontWeight: "600",
   },
   subtitle: {
-    color: PlatformColor("secondaryLabel"),
+    color: ios26Colors.textSecondary,
     fontSize: 14,
   },
   time: {
-    color: PlatformColor("tertiaryLabel"),
+    color: ios26Colors.textMuted,
     fontSize: 12,
     marginTop: 2,
   },
