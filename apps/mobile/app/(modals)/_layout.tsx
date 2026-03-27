@@ -1,13 +1,12 @@
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { PlatformColor } from "react-native";
-import {
-  ios26BlurEffect,
-  ios26Colors,
-  ios26StackScreenOptions,
-} from "@/constants/ios26";
+import { Pressable } from "react-native";
+import { SymbolView } from "expo-symbols";
+import { ios26Colors, ios26StackScreenOptions } from "@/constants/ios26";
 
 const iosProfileColors = {
-  background: PlatformColor("systemGroupedBackground") as unknown as string,
+  background: "#1C1C1E",
+  button: "#2C2C2E",
   label: PlatformColor("label") as unknown as string,
 };
 
@@ -22,12 +21,34 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="profile"
         options={{
+          presentation: "modal",
           headerShown: true,
           title: "Profile",
-          headerLargeTitle: true,
-          headerTransparent: true,
-          headerBlurEffect: ios26BlurEffect,
+          headerLargeTitle: false,
           headerShadowVisible: false,
+          headerLeft: () => (
+            <Link href=".." asChild>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close profile"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: iosProfileColors.button,
+                }}
+              >
+                <SymbolView
+                  name="xmark"
+                  style={{ width: 18, height: 18 }}
+                  tintColor={iosProfileColors.label}
+                  type="hierarchical"
+                />
+              </Pressable>
+            </Link>
+          ),
           headerStyle: {
             backgroundColor: iosProfileColors.background,
           },

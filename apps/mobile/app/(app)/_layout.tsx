@@ -25,7 +25,6 @@ export default function AppLayout() {
         <Label>Home</Label>
         <Icon
           sf={{ default: "house", selected: "house.fill" }}
-          md="home"
           androidSrc={<VectorIcon family={Ionicons} name="home-outline" />}
         />
       </NativeTabs.Trigger>
@@ -34,7 +33,6 @@ export default function AppLayout() {
         <Label>Search</Label>
         <Icon
           sf={{ default: "magnifyingglass", selected: "magnifyingglass" }}
-          md="search"
           androidSrc={<VectorIcon family={Ionicons} name="search-outline" />}
         />
       </NativeTabs.Trigger>
@@ -42,11 +40,7 @@ export default function AppLayout() {
       <NativeTabs.Trigger name="scan">
         <Label>Scan</Label>
         <Icon
-          sf={{
-            default: "barcode.viewfinder",
-            selected: "barcode.viewfinder",
-          }}
-          md="qr-code-scanner"
+          sf={{ default: "barcode.viewfinder", selected: "barcode.viewfinder" }}
           androidSrc={<VectorIcon family={Ionicons} name="barcode-outline" />}
         />
       </NativeTabs.Trigger>

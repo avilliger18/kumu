@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@kumu/backend/convex/_generated/api";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Card, CardContent } from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
 
 const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
 
@@ -45,12 +49,13 @@ export default function SupplyChainGlobe() {
     <main className="relative h-screen w-screen overflow-hidden bg-slate-100 text-slate-900">
       {isAuthenticated && (
         <div className="fixed top-4 right-4 z-50">
-          <button
+          <Button
             onClick={() => signOut()}
-            className="rounded-xl border border-slate-300 bg-white/90 px-4 py-2 text-sm text-slate-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+            variant="outline"
+            // size="default"
           >
             Sign out
-          </button>
+          </Button>
         </div>
       )}
 
@@ -62,124 +67,129 @@ export default function SupplyChainGlobe() {
               : "w-0 p-0 opacity-0 pointer-events-none"
           }`}
         >
-          <div
-            className={`h-[90%] rounded-3xl border border-slate-300 bg-white p-6 transition-all duration-500 ease-out ${
+          <Card
+            className={`h-[90%] rounded-3xl border-slate-300 bg-white p-0 transition-all duration-500 ease-out ${
               showInfoBox ? "translate-x-0" : "-translate-x-8"
             }`}
           >
-            <h2 className="text-lg font-semibold text-slate-900">
-              Barcode Info
-            </h2>
+            <CardContent className="p-6">
+              {!scanResult && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  Lade Testdaten fuer den Barcode...
+                </div>
+              )}
 
-            {!scanResult && (
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                Lade Testdaten fuer den Barcode...
-              </div>
-            )}
+              {scanResult?.resolutionStatus !== "found" && scanResult && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  Kein Produkt fuer diesen Barcode gefunden.
+                </div>
+              )}
 
-            {scanResult?.resolutionStatus !== "found" && scanResult && (
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                Kein Produkt fuer diesen Barcode gefunden.
-              </div>
-            )}
-
-            {product && (
-              <div className="mt-5 flex h-[calc(100%-3rem)] flex-col gap-5 text-slate-700">
-                <div className="grid grid-cols-[40%_1fr] gap-5">
-                  <div className="relative min-h-[220px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                    <Image
-                      src={product.thumbnailUrl ?? "/globe.svg"}
-                      alt={product.title}
-                      fill
-                      unoptimized
-                      className="object-contain p-3"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <h3 className="text-xl font-semibold text-slate-900">
-                      {product.title}
-                    </h3>
-                    <p className="text-sm text-slate-600">
-                      {producer?.displayName ?? "Unbekannt"}
-                    </p>
-                    <p>
-                      <span className="font-medium text-slate-900">
-                        Barcode:
-                      </span>{" "}
-                      {cleanedBarcode}
-                    </p>
-
-                    <div>
-                      <div className="mb-2 flex items-center gap-2">
-                        <span className="font-medium text-slate-900">
-                          Kumu Score
-                        </span>
-                        <span
-                          className="inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-slate-300 text-xs text-slate-600"
-                          title="Der Kumu Score bewertet die Gesamtqualitaet des Produkts auf einer Skala von 0 bis 100."
-                        >
-                          ?
-                        </span>
-                        <span className="text-sm text-slate-700">
-                          {product.qualityScores.overallFoodScore}/100
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        value={product.qualityScores.overallFoodScore}
-                        disabled
-                        className="h-2 w-full cursor-not-allowed accent-slate-700"
+              {product && (
+                <div className="flex h-[calc(100%-3rem)] flex-col gap-5 text-slate-700">
+                  <div className="grid grid-cols-[40%_1fr] gap-5">
+                    <div className="relative min-h-[220px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                      <Image
+                        src={product.thumbnailUrl ?? "/globe.svg"}
+                        alt={product.title}
+                        fill
+                        unoptimized
+                        className="object-contain p-3"
                       />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      {product.labels.length > 0 ? (
-                        product.labels.map((label) => (
-                          <span
-                            key={label}
-                            className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700"
-                          >
-                            {label}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs text-slate-500">
-                          Keine Labels vorhanden
-                        </span>
-                      )}
+                    <div className="space-y-3">
+                      <h3 className="text-2xl font-semibold font-heading">
+                        {product.title}
+                      </h3>
+                      <p className="text-sm">
+                        {producer?.displayName ?? "Unbekannt"}
+                      </p>
+                      <p>
+                        <span className="font-medium">Barcode:</span>{" "}
+                        {cleanedBarcode}
+                      </p>
 
-                      <button
-                        type="button"
-                        className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                      >
-                        View certificates
-                      </button>
+                      <div>
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className="font-medium">Kumu Score</span>
+                          <span
+                            className="inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-slate-300 text-xs"
+                            title="Der Kumu Score bewertet die Gesamtqualitaet des Produkts auf einer Skala von 0 bis 100."
+                          >
+                            ?
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm">
+                          {product.qualityScores.overallFoodScore}/100
+                        </p>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={product.qualityScores.overallFoodScore}
+                          disabled
+                          className="h-2 w-full cursor-not-allowed accent-[#FF459F]"
+                        />
+                      </div>
+
+                      <div className="pt-1">
+                        <h4 className="font-heading text-base">Labels</h4>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {product.labels.length > 0 ? (
+                            product.labels.map((label) => (
+                              <Badge key={label} variant="secondary">
+                                {label}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs">
+                              Keine Labels vorhanden
+                            </span>
+                          )}
+
+                          <Button type="button" variant="outline" size="sm">
+                            View certificates
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <h4 className="text-sm font-semibold text-slate-900">
-                    Nutritional values (per 100g)
-                  </h4>
-                  <div className="mt-3 grid grid-cols-2 gap-x-5 gap-y-2 text-sm md:grid-cols-3">
-                    <p>Energy: {nutrition?.energyKcal ?? "-"} kcal</p>
-                    <p>Fat: {nutrition?.fat ?? "-"} g</p>
-                    <p>Saturated fat: {nutrition?.saturatedFat ?? "-"} g</p>
-                    <p>Carbs: {nutrition?.carbs ?? "-"} g</p>
-                    <p>Sugars: {nutrition?.sugars ?? "-"} g</p>
-                    <p>Fiber: {nutrition?.fiber ?? "-"} g</p>
-                    <p>Protein: {nutrition?.protein ?? "-"} g</p>
-                    <p>Salt: {nutrition?.salt ?? "-"} g</p>
-                    <p>Iron: {nutrition?.iron ?? "-"} mg</p>
+                  <div className="flex flex-col gap-2">
+                    <h4 className="font-heading text-lg">
+                      Nutritional values (per 100g)
+                    </h4>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="grid grid-cols-2 gap-x-5 gap-y-2 text-sm md:grid-cols-3">
+                        <p>Energy: {nutrition?.energyKcal ?? "-"} kcal</p>
+                        <p>Fat: {nutrition?.fat ?? "-"} g</p>
+                        <p>Saturated fat: {nutrition?.saturatedFat ?? "-"} g</p>
+                        <p>Carbs: {nutrition?.carbs ?? "-"} g</p>
+                        <p>Sugars: {nutrition?.sugars ?? "-"} g</p>
+                        <p>Fiber: {nutrition?.fiber ?? "-"} g</p>
+                        <p>Protein: {nutrition?.protein ?? "-"} g</p>
+                        <p>Salt: {nutrition?.salt ?? "-"} g</p>
+                        <p>Iron: {nutrition?.iron ?? "-"} mg</p>
+                      </div>
+                    </div>
                   </div>
+
+                  <Card className="rounded-2xl">
+                    <CardContent className="p-5">
+                      <h4 className="font-heading text-lg">
+                        Ecological footprint
+                      </h4>
+                      <p className="mt-4 text-sm">Distance traveled</p>
+                      <p className="mt-1 text-4xl font-heading leading-none">
+                        1,240 km
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </CardContent>
+          </Card>
         </aside>
 
         <section
@@ -191,13 +201,12 @@ export default function SupplyChainGlobe() {
             <label htmlFor="barcode-search" className="sr-only">
               Barcode eingeben
             </label>
-            <input
+            <Input
               id="barcode-search"
               type="text"
               value={barcode}
               onChange={(event) => setBarcode(event.target.value)}
               placeholder="Barcode eingeben..."
-              className="h-14 w-full rounded-2xl border border-slate-300 bg-white/95 px-5 text-base shadow-md outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-400/35"
             />
           </div>
 

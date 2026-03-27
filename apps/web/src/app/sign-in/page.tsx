@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import circle from "../../../public/circle-bubble.png";
+import { Input } from "~/components/ui/input";
 
 export default function SignInPage() {
   const { signIn } = useAuthActions();
@@ -84,10 +85,9 @@ export default function SignInPage() {
 
         {/* Email Input */}
         <div className="mb-4">
-          <input
+          <Input
             type="email"
             placeholder="E-Mail"
-            className="w-full px-4 py-4 rounded-xl bg-white border border-blue-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -99,10 +99,9 @@ export default function SignInPage() {
         {/* OTP Input (only after step 1) */}
         {step === "code" && (
           <div className="mb-4">
-            <input
+            <Input
               type="text"
               placeholder="Enter OTP Code"
-              className="w-full px-4 py-4 rounded-xl bg-white border border-blue-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
               value={code}
               onChange={(e) => {
                 setCode(e.target.value);

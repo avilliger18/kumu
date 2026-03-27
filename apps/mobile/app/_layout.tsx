@@ -2,6 +2,7 @@ import "../global.css";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ThemeProvider } from "@react-navigation/native";
 import { ConvexReactClient, useConvexAuth } from "convex/react";
+import { useMutation } from "convex/react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SystemUI from "expo-system-ui";
@@ -13,6 +14,7 @@ import {
   ios26NavigationTheme,
   ios26StackScreenOptions,
 } from "@/constants/ios26";
+import { api } from "@kumu/backend/convex/_generated/api";
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
@@ -30,8 +32,15 @@ export const unstable_settings = {
 
 function RootNavigator() {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const syncCurrentProfile = useMutation(api.users.syncCurrentProfile);
   const segments = useSegments();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      syncCurrentProfile().catch(() => {});
+    }
+  }, [isAuthenticated, syncCurrentProfile]);
 
   useEffect(() => {
     if (isLoading) return;
