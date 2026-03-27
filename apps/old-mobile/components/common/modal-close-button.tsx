@@ -6,8 +6,16 @@ type ModalCloseButtonProps = {
   backgroundColor?: string;
 };
 
+// Button and line dimensions
+const BTN = 32;
+const LINE_W = 14;
+const LINE_H = 2;
+// These insets place the line's center exactly at the button's center
+const LINE_TOP = (BTN - LINE_H) / 2;
+const LINE_LEFT = (BTN - LINE_W) / 2;
+
 export default function ModalCloseButton({
-  backgroundColor = "#2C2C2E",
+  backgroundColor = ios26Colors.surfaceElevated,
 }: ModalCloseButtonProps) {
   const router = useRouter();
 
@@ -22,45 +30,39 @@ export default function ModalCloseButton({
         pressed && styles.pressed,
       ]}
     >
-      <View style={styles.icon}>
-        <View style={[styles.line, styles.lineA]} />
-        <View style={[styles.line, styles.lineB]} />
-      </View>
+      <View style={styles.lineA} />
+      <View style={styles.lineB} />
     </Pressable>
   );
 }
 
-const LINE_LENGTH = 16;
-const LINE_THICKNESS = 2.25;
-
 const styles = StyleSheet.create({
   button: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    width: BTN,
+    height: BTN,
+    borderRadius: BTN / 2,
   },
   pressed: {
-    opacity: 0.75,
-  },
-  icon: {
-    width: LINE_LENGTH,
-    height: LINE_LENGTH,
-  },
-  line: {
-    position: "absolute",
-    width: LINE_LENGTH,
-    height: LINE_THICKNESS,
-    borderRadius: 999,
-    backgroundColor: ios26Colors.textPrimary,
-    top: (LINE_LENGTH - LINE_THICKNESS) / 2,
-    left: 0,
+    opacity: 0.6,
   },
   lineA: {
+    position: "absolute",
+    top: LINE_TOP,
+    left: LINE_LEFT,
+    width: LINE_W,
+    height: LINE_H,
+    borderRadius: LINE_H / 2,
+    backgroundColor: ios26Colors.textSecondary,
     transform: [{ rotate: "45deg" }],
   },
   lineB: {
+    position: "absolute",
+    top: LINE_TOP,
+    left: LINE_LEFT,
+    width: LINE_W,
+    height: LINE_H,
+    borderRadius: LINE_H / 2,
+    backgroundColor: ios26Colors.textSecondary,
     transform: [{ rotate: "-45deg" }],
   },
 });
