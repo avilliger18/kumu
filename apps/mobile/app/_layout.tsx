@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
+import { ios26ModalOptions } from "@/constants/ios26-navigation";
 import { AuthProvider } from "@/providers/auth-context";
 import { ConvexClientProvider } from "@/providers/convex-provider";
 
@@ -18,17 +19,11 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="profile"
-              options={{
-                presentation: "modal",
-                headerShown: false,
-              }}
-            />
+            <Stack.Screen name="profile" options={ios26ModalOptions} />
             <Stack.Screen
               name="product"
               options={{
-                presentation: "modal",
+                ...ios26ModalOptions,
                 headerShown: false,
               }}
             />

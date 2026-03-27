@@ -26,16 +26,19 @@ export default function ScanScreen() {
     scanning.current = true;
 
     try {
-      router.push(`/product/${encodeURIComponent(data)}?source=scan`);
+      router.push({
+        pathname: "/product/[barcode]",
+        params: { barcode: data, source: "scan" },
+      });
     } catch {
       // navigation failed — allow retry
       scanning.current = false;
       return;
     }
 
-    // Reset after 2 s so the scanner works again when the sheet is dismissed.
-    // (NativeTabs doesn't blur on modal presentation, so useFocusEffect
-    //  cleanup never fires while a formSheet sits on top.)
+    // Reset after 2 s so the scanner works again when the modal is dismissed.
+    // NativeTabs doesn't blur on modal presentation, so useFocusEffect
+    // cleanup never fires while the product route sits on top.
     setTimeout(() => {
       scanning.current = false;
     }, 2000);

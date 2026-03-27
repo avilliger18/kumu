@@ -1,6 +1,24 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 
-// No nested navigator — the root Stack's formSheet handles presentation.
+import {
+  ios26LargeTitleScreenOptions,
+  ios26ScrollEdgeEffects,
+} from "@/constants/ios26-navigation";
+
 export default function ProductLayout() {
-  return <Slot />;
+  return (
+    <Stack
+      screenOptions={{
+        scrollEdgeEffects: ios26ScrollEdgeEffects,
+      }}>
+      <Stack.Screen name="[barcode]" />
+      <Stack.Screen
+        name="production"
+        options={{
+          title: "Production",
+          ...ios26LargeTitleScreenOptions,
+        }}
+      />
+    </Stack>
+  );
 }

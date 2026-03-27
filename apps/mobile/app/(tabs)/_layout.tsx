@@ -1,5 +1,6 @@
 import { Redirect } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { Platform } from "react-native";
 
 import { useAuth } from "@/providers/auth-context";
 
@@ -10,15 +11,27 @@ export default function TabLayout() {
     return <Redirect href="/(auth)/email" />;
   }
 
+  const overviewTriggerProps = {
+    name: "overview" as const,
+    options: {
+      title: "Overview",
+      icon: { sf: "house.fill", drawable: "home" } as const,
+    },
+    ...(Platform.OS === "ios" ? { disableAutomaticContentInsets: true } : {}),
+  };
+
+  const chatsTriggerProps = {
+    name: "chats" as const,
+    options: {
+      title: "Chats",
+      icon: { sf: "bubble.left.and.bubble.right.fill", drawable: "chat" } as const,
+    },
+    ...(Platform.OS === "ios" ? { disableAutomaticContentInsets: true } : {}),
+  };
+
   return (
     <NativeTabs minimizeBehavior="onScrollDown">
-      <NativeTabs.Trigger
-        name="overview"
-        options={{
-          title: "Overview",
-          icon: { sf: "house.fill", drawable: "home" },
-        }}
-      />
+      <NativeTabs.Trigger {...overviewTriggerProps} />
       <NativeTabs.Trigger
         name="scan"
         options={{
@@ -26,6 +39,7 @@ export default function TabLayout() {
           icon: { sf: "barcode.viewfinder", drawable: "qr_code_scanner" },
         }}
       />
+      <NativeTabs.Trigger {...chatsTriggerProps} />
     </NativeTabs>
   );
 }

@@ -1,8 +1,12 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { router } from "expo-router";
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { router, Stack } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  createNativeCloseButtonOptions,
+  ios26LargeTitleScreenOptions,
+} from "@/constants/ios26-navigation";
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
 type RowProps = {
@@ -21,7 +25,7 @@ function Row({ label, onPress, destructive, last }: RowProps) {
         <Text style={[styles.rowLabel, destructive && styles.rowDestructive]}>
           {label}
         </Text>
-        {!destructive && <Text style={styles.chevron}>›</Text>}
+        {!destructive && <Text style={styles.chevron}>{">"}</Text>}
       </Pressable>
       {!last && <View style={styles.rowDivider} />}
     </>
@@ -46,18 +50,17 @@ export default function ProfileModal() {
   }
 
   return (
-    <View style={styles.root}>
-      {/* Drag handle area */}
-      <View style={styles.handleBar}>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.6 }]}>
-          <Text style={styles.closeBtnText}>✕</Text>
-        </Pressable>
-      </View>
-
+    <>
+      <Stack.Screen
+        options={{
+          title: "Profile",
+          ...ios26LargeTitleScreenOptions,
+          ...createNativeCloseButtonOptions(() => router.back()),
+        }}
+      />
       <ScrollView
-        style={styles.scroll}
+        style={styles.root}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 40 },
@@ -65,8 +68,6 @@ export default function ProfileModal() {
         showsVerticalScrollIndicator={false}
         bounces
         alwaysBounceVertical>
-
-        {/* Avatar + name */}
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>AS</Text>
@@ -75,7 +76,6 @@ export default function ProfileModal() {
           <Text style={styles.email}>abinayan@example.com</Text>
         </View>
 
-        {/* Account */}
         <Group>
           <Row label="Edit profile" />
           <Row label="Notifications" last />
@@ -102,7 +102,7 @@ export default function ProfileModal() {
           Your scan data is stored securely and never shared without your consent.
         </Text>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
@@ -111,30 +111,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: ios26Colors.surface,
   },
-  handleBar: {
-    height: 56,
-    paddingHorizontal: 20,
-    justifyContent: "center",
-    alignItems: "flex-start",
-  },
-  closeBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: ios26Colors.surfaceElevated,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  closeBtnText: {
-    fontSize: 13,
-    color: ios26Colors.textMuted,
-    fontWeight: "600",
-  },
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingTop: 4,
+    paddingTop: 8,
   },
   profileHeader: {
     alignItems: "center",
@@ -190,7 +168,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   rowPressed: {
-    backgroundColor: ios26Colors.surfaceElevated,
+    backgroundColor: ios26Colors.surfaceHigh,
   },
   rowLabel: {
     fontSize: 17,

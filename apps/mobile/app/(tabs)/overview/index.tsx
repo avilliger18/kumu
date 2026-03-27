@@ -12,23 +12,21 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function timeAgo(ms: number): string {
   const diff = Date.now() - ms;
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  return `${Math.floor(hours / 24)}d ago`;
+}
 
 function ScanRow({ item, last }: { item: any; last: boolean }) {
   const canOpen = item.resolutionStatus !== "not_found" && item.barcodeRaw;
@@ -37,7 +35,10 @@ function ScanRow({ item, last }: { item: any; last: boolean }) {
     <Pressable
       onPress={() =>
         canOpen
-          ? router.push(`/product/${encodeURIComponent(item.barcodeRaw)}`)
+          ? router.push({
+              pathname: "/product/[barcode]",
+              params: { barcode: item.barcodeRaw },
+            })
           : undefined
       }
       style={({ pressed }) => [
@@ -45,7 +46,6 @@ function ScanRow({ item, last }: { item: any; last: boolean }) {
         !last && styles.rowBorder,
         pressed && canOpen && styles.rowPressed,
       ]}>
-
       <View style={styles.thumb}>
         {item.productImageUrl ? (
           <Image
@@ -84,28 +84,23 @@ function ScanRow({ item, last }: { item: any; last: boolean }) {
   );
 }
 
-// ── Screen ────────────────────────────────────────────────────────────────────
-
 export default function OverviewScreen() {
   const [query, setQuery] = useState("");
+  const insets = useSafeAreaInsets();
   const scans = useQuery(api.products.recentUserScans) ?? [];
 
   const filtered = query.trim()
     ? scans.filter(
-        (s: any) =>
-          s.productTitle?.toLowerCase().includes(query.toLowerCase()) ||
-          s.producerDisplayName?.toLowerCase().includes(query.toLowerCase()) ||
-          s.barcodeRaw?.includes(query),
+        (scan: any) =>
+          scan.productTitle?.toLowerCase().includes(query.toLowerCase()) ||
+          scan.producerDisplayName?.toLowerCase().includes(query.toLowerCase()) ||
+          scan.barcodeRaw?.includes(query),
       )
     : scans;
 
   return (
-    <SafeAreaView style={styles.root} edges={["top"]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
-
-        {/* ── Title bar ──────────────────────────────────────────────── */}
+    <View style={styles.root}>
+      <SafeAreaView edges={["top"]}>
         <View style={styles.titleBar}>
           <Text style={styles.title}>Overview</Text>
           <Pressable
@@ -117,7 +112,6 @@ export default function OverviewScreen() {
           </Pressable>
         </View>
 
-        {/* ── Search bar ─────────────────────────────────────────────── */}
         <View style={styles.searchWrap}>
           <SymbolView
             name="magnifyingglass"
@@ -136,8 +130,16 @@ export default function OverviewScreen() {
             autoCapitalize="none"
           />
         </View>
+      </SafeAreaView>
 
-        {/* ── List ───────────────────────────────────────────────────── */}
+      <ScrollView
+        style={styles.scrollView}
+        contentInsetAdjustmentBehavior="never"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 48 },
+        ]}>
         {filtered.length === 0 ? (
           <View style={styles.empty}>
             <SymbolView
@@ -157,24 +159,31 @@ export default function OverviewScreen() {
           </View>
         ) : (
           <View style={styles.list}>
-            {filtered.map((item: any, i: number) => (
-              <ScanRow key={item._id} item={item} last={i === filtered.length - 1} />
+            {filtered.map((item: any, index: number) => (
+              <ScanRow
+                key={item._id}
+                item={item}
+                last={index === filtered.length - 1}
+              />
             ))}
           </View>
         )}
-
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#000" },
-  scrollContent: { paddingBottom: 48 },
-
-  // Title bar
+  root: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 48,
+  },
   titleBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -203,8 +212,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: 0.4,
   },
-
-  // Search
   searchWrap: {
     flexDirection: "row",
     alignItems: "center",
@@ -216,15 +223,16 @@ const styles = StyleSheet.create({
     backgroundColor: ios26Colors.surfaceElevated,
     gap: 6,
   },
-  searchIcon: { width: 16, height: 16 },
+  searchIcon: {
+    width: 16,
+    height: 16,
+  },
   searchInput: {
     flex: 1,
     fontSize: 15,
     color: "#fff",
     paddingVertical: 0,
   },
-
-  // List
   list: {
     marginHorizontal: 16,
     backgroundColor: ios26Colors.surface,
@@ -242,9 +250,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: ios26Colors.separator,
   },
-  rowPressed: { backgroundColor: ios26Colors.surfaceElevated },
-
-  // Thumbnail
+  rowPressed: {
+    backgroundColor: ios26Colors.surfaceElevated,
+  },
   thumb: {
     width: 44,
     height: 44,
@@ -254,34 +262,66 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  thumbImg: { width: 44, height: 44 },
-  thumbFallback: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-  thumbLetter: { fontSize: 18, fontWeight: "700", color: ios26Colors.textMuted },
-
-  // Row text
-  rowBody: { flex: 1, gap: 3 },
-  rowTitle: { fontSize: 15, fontWeight: "500", color: "#fff" },
-  rowSub: { fontSize: 13, color: ios26Colors.textMuted },
-  chevron: { fontSize: 20, color: ios26Colors.textMuted, fontWeight: "300" },
-
-  // Unknown chip
+  thumbImg: {
+    width: 44,
+    height: 44,
+  },
+  thumbFallback: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbLetter: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: ios26Colors.textMuted,
+  },
+  rowBody: {
+    flex: 1,
+    gap: 3,
+  },
+  rowTitle: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#fff",
+  },
+  rowSub: {
+    fontSize: 13,
+    color: ios26Colors.textMuted,
+  },
+  chevron: {
+    fontSize: 20,
+    color: ios26Colors.textMuted,
+    fontWeight: "300",
+  },
   unknownChip: {
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     backgroundColor: ios26Colors.surfaceElevated,
   },
-  unknownChipText: { fontSize: 11, fontWeight: "600", color: ios26Colors.textMuted },
-
-  // Empty state
+  unknownChipText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: ios26Colors.textMuted,
+  },
   empty: {
     marginTop: 80,
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 32,
   },
-  emptyIcon: { width: 52, height: 52, marginBottom: 4 },
-  emptyTitle: { fontSize: 17, fontWeight: "600", color: "#fff" },
+  emptyIcon: {
+    width: 52,
+    height: 52,
+    marginBottom: 4,
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#fff",
+  },
   emptySub: {
     fontSize: 14,
     color: ios26Colors.textMuted,

@@ -1,9 +1,8 @@
 import { api } from "@kumu/backend/convex/_generated/api";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useRef } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -16,9 +15,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery } from "convex/react";
 
+import {
+  createNativeCloseButtonOptions,
+  ios26ScrollEdgeEffects,
+} from "@/constants/ios26-navigation";
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
-
-// ── Design helpers ────────────────────────────────────────────────────────────
 
 const NUTRI: Record<string, { bg: string; fg: string }> = {
   A: { bg: "#1A9E5A", fg: "#fff" },
@@ -34,8 +35,6 @@ const NOVA_COLOR: Record<number, string> = {
   3: "#EF7D1A",
   4: "#E03520",
 };
-
-// ── Sub-components ────────────────────────────────────────────────────────────
 
 function SectionHeader({ title }: { title: string }) {
   return <Text style={s.sectionHeader}>{title}</Text>;
@@ -61,6 +60,7 @@ function NutrientRow({
   last?: boolean;
 }) {
   if (value === undefined || value === null) return null;
+
   return (
     <View style={[s.nutriRow, !last && s.nutriRowBorder, sub && s.nutriRowSub]}>
       <Text style={[s.nutriLabel, bold && s.nutriBold, sub && s.nutriMuted]}>
@@ -86,22 +86,17 @@ function ScorePill({
   bg: string;
   fg?: string;
 }) {
+  const subColor = fg === "#fff" ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.6)";
+  const noteColor = fg === "#fff" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.5)";
+
   return (
     <View style={[s.scorePill, { backgroundColor: bg }]}>
       <Text style={[s.scoreLetter, { color: fg }]}>{letter}</Text>
-      <Text style={[s.scoreLabel, { color: fg === "#fff" ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.6)" }]}>
-        {label}
-      </Text>
-      {note ? (
-        <Text style={[s.scoreNote, { color: fg === "#fff" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.5)" }]}>
-          {note}
-        </Text>
-      ) : null}
+      <Text style={[s.scoreLabel, { color: subColor }]}>{label}</Text>
+      {note ? <Text style={[s.scoreNote, { color: noteColor }]}>{note}</Text> : null}
     </View>
   );
 }
-
-// ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function ProductSheet() {
   const params = useLocalSearchParams<{ barcode: string; source?: string }>();
@@ -116,49 +111,91 @@ export default function ProductSheet() {
     barcode.length > 0 ? { barcode } : "skip",
   ) as any;
 
-  // Record scan once
+  const isResolvedProduct = result && result.resolutionStatus !== "not_found";
+  const productTitle = isResolvedProduct ? result.product?.title ?? "Product" : "Product";
+
   useEffect(() => {
-    if (!barcode || !result || source !== "scan" || recorded.current === barcode) return;
-    const payload = result.resolutionStatus === "not_found"
-      ? { sessionId: "mobile", barcodeRaw: barcode, resolutionStatus: "not_found" as const, clientPlatform: Platform.OS }
-      : {
-          sessionId: "mobile",
-          barcodeRaw: barcode,
-          batchCodeRaw: result.batch?.batchCodeRaw,
-          resolutionStatus: result.batch ? ("found" as const) : ("found_no_batch" as const),
-          productTitle: result.product?.title,
-          productSubtitle: result.product?.subtitle,
-          productImageUrl: result.product?.thumbnailUrl,
-          producerDisplayName: result.producer?.displayName,
-          clientPlatform: Platform.OS,
-        };
+    if (!barcode || !result || source !== "scan" || recorded.current === barcode) {
+      return;
+    }
+
+    const payload =
+      result.resolutionStatus === "not_found"
+        ? {
+            sessionId: "mobile",
+            barcodeRaw: barcode,
+            resolutionStatus: "not_found" as const,
+            clientPlatform: Platform.OS,
+          }
+        : {
+            sessionId: "mobile",
+            barcodeRaw: barcode,
+            batchCodeRaw: result.batch?.batchCodeRaw,
+            resolutionStatus: result.batch
+              ? ("found" as const)
+              : ("found_no_batch" as const),
+            productTitle: result.product?.title,
+            productSubtitle: result.product?.subtitle,
+            productImageUrl: result.product?.thumbnailUrl,
+            producerDisplayName: result.producer?.displayName,
+            clientPlatform: Platform.OS,
+          };
+
     recordScan(payload).catch(() => {});
     recorded.current = barcode;
   }, [barcode, result, source, recordScan]);
 
-  // ── Loading ───────────────────────────────────────────────────────────────
+  const screenOptions = {
+    title: productTitle,
+    scrollEdgeEffects: ios26ScrollEdgeEffects,
+    ...(Platform.OS === "ios"
+      ? createNativeCloseButtonOptions(() => router.back())
+      : {
+          headerLeft: ({ tintColor }: { tintColor?: string }) => (
+            <Pressable
+              onPress={() => router.back()}
+              hitSlop={12}
+              style={({ pressed }) => [pressed && s.headerActionPressed]}>
+              <Text style={[s.headerAction, tintColor ? { color: tintColor } : null]}>
+                Close
+              </Text>
+            </Pressable>
+          ),
+        }),
+  };
+
   if (result === undefined) {
     return (
-      <View style={[s.root, s.center]}>
-        <ActivityIndicator color={ios26Colors.textPrimary} size="large" />
-        <Text style={s.loadingText}>Looking up product…</Text>
-      </View>
+      <>
+        <Stack.Screen options={screenOptions} />
+        <View style={[s.root, s.center]}>
+          <ActivityIndicator color={ios26Colors.textPrimary} size="large" />
+          <Text style={s.loadingText}>Looking up product...</Text>
+        </View>
+      </>
     );
   }
 
-  // ── Not found ─────────────────────────────────────────────────────────────
   if (result.resolutionStatus === "not_found") {
     return (
-      <View style={[s.root, s.center]}>
-        <SymbolView name="barcode" style={s.nfIcon} tintColor={ios26Colors.textMuted} type="hierarchical" />
-        <Text style={s.nfTitle}>Product not found</Text>
-        <Text style={s.nfSub}>{barcode}</Text>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [s.nfBtn, pressed && { opacity: 0.72 }]}>
-          <Text style={s.nfBtnText}>Go back</Text>
-        </Pressable>
-      </View>
+      <>
+        <Stack.Screen options={screenOptions} />
+        <View style={[s.root, s.center]}>
+          <SymbolView
+            name="barcode"
+            style={s.nfIcon}
+            tintColor={ios26Colors.textMuted}
+            type="hierarchical"
+          />
+          <Text style={s.nfTitle}>Product not found</Text>
+          <Text style={s.nfSub}>{barcode}</Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [s.nfBtn, pressed && { opacity: 0.72 }]}>
+            <Text style={s.nfBtnText}>Go back</Text>
+          </Pressable>
+        </View>
+      </>
     );
   }
 
@@ -166,20 +203,19 @@ export default function ProductSheet() {
   const nutrition = product.nutrition?.per100 ?? {};
   const qs = product.qualityScores ?? {};
 
-  // Random CO₂ distance for now (20 000 – 60 000 km)
   const co2Distance = Math.floor(20000 + Math.random() * 40000)
     .toLocaleString("de-CH")
     .replace(",", "'");
 
   return (
-    <View style={s.root}>
+    <>
+      <Stack.Screen options={screenOptions} />
       <ScrollView
+        style={s.root}
+        contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 48 }}>
-
-        {/* ── Hero ─────────────────────────────────────────────────────── */}
         <View style={s.heroCard}>
-          {/* Image area */}
           <View style={s.heroImageArea}>
             {product.thumbnailUrl ? (
               <Image
@@ -195,30 +231,42 @@ export default function ProductSheet() {
               />
             )}
 
-            {/* Close button floats over image */}
-            <Pressable
-              onPress={() => router.back()}
-              style={s.closeBtn}
-              hitSlop={12}>
-              <SymbolView name="xmark" style={s.closeIcon} tintColor={ios26Colors.textMuted} />
-            </Pressable>
-
-            {/* NutriScore badge floats bottom-right of image */}
             {qs.nutriScore ? (
-              <View style={[s.nutriBadge, { backgroundColor: NUTRI[qs.nutriScore]?.bg ?? ios26Colors.surfaceElevated }]}>
-                <Text style={[s.nutriBadgeLetter, { color: NUTRI[qs.nutriScore]?.fg ?? "#fff" }]}>
+              <View
+                style={[
+                  s.nutriBadge,
+                  {
+                    backgroundColor:
+                      NUTRI[qs.nutriScore]?.bg ?? ios26Colors.surfaceElevated,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    s.nutriBadgeLetter,
+                    { color: NUTRI[qs.nutriScore]?.fg ?? "#fff" },
+                  ]}>
                   {qs.nutriScore}
                 </Text>
-                <Text style={[s.nutriBadgeLabel, { color: NUTRI[qs.nutriScore]?.fg === "#000" ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.7)" }]}>
+                <Text
+                  style={[
+                    s.nutriBadgeLabel,
+                    {
+                      color:
+                        NUTRI[qs.nutriScore]?.fg === "#000"
+                          ? "rgba(0,0,0,0.55)"
+                          : "rgba(255,255,255,0.7)",
+                    },
+                  ]}>
                   {"Nutri\nScore"}
                 </Text>
               </View>
             ) : null}
           </View>
 
-          {/* Text area */}
           <View style={s.heroText}>
-            <Text style={s.heroTitle} numberOfLines={2}>{product.title}</Text>
+            <Text style={s.heroTitle} numberOfLines={2}>
+              {product.title}
+            </Text>
             {product.subtitle ? (
               <Text style={s.heroSubtitle}>{product.subtitle}</Text>
             ) : null}
@@ -226,7 +274,7 @@ export default function ProductSheet() {
               <Text style={s.heroBrand}>{producer?.displayName ?? "Unknown"}</Text>
               {product.category ? (
                 <>
-                  <Text style={s.heroDot}>·</Text>
+                  <Text style={s.heroDot}>/</Text>
                   <Text style={s.heroCategory}>{product.category}</Text>
                 </>
               ) : null}
@@ -234,8 +282,7 @@ export default function ProductSheet() {
             <Text style={s.heroBarcode}>{barcode}</Text>
           </View>
 
-          {/* Quality score strip */}
-          {(qs.novaGroup || qs.overallFoodScore !== undefined) ? (
+          {qs.novaGroup || qs.overallFoodScore !== undefined ? (
             <View style={s.scoreStrip}>
               {qs.novaGroup ? (
                 <ScorePill
@@ -256,7 +303,6 @@ export default function ProductSheet() {
           ) : null}
         </View>
 
-        {/* ── Ingredients ───────────────────────────────────────────────── */}
         {product.ingredientsText ? (
           <View style={s.section}>
             <SectionHeader title="Ingredients" />
@@ -266,9 +312,10 @@ export default function ProductSheet() {
           </View>
         ) : null}
 
-        {/* ── Nutrition ─────────────────────────────────────────────────── */}
         <View style={s.section}>
-          <SectionHeader title={`Nutritional values · per ${product.nutrition?.referenceBasis ?? "100g"}`} />
+          <SectionHeader
+            title={`Nutritional values - per ${product.nutrition?.referenceBasis ?? "100g"}`}
+          />
           <Card style={s.cardNoPad}>
             <NutrientRow label="Energy" value={nutrition.energyKcal} unit="kcal" bold />
             <NutrientRow label="Fat" value={nutrition.fat} bold />
@@ -278,32 +325,48 @@ export default function ProductSheet() {
             <NutrientRow label="Fibre" value={nutrition.fiber} />
             <NutrientRow label="Protein" value={nutrition.protein} bold />
             <NutrientRow label="Salt" value={nutrition.salt} />
-            {nutrition.calcium !== undefined && <NutrientRow label="Calcium" value={nutrition.calcium} unit="mg" />}
-            {nutrition.iron !== undefined && <NutrientRow label="Iron" value={nutrition.iron} unit="mg" />}
-            {nutrition.magnesium !== undefined && <NutrientRow label="Magnesium" value={nutrition.magnesium} unit="mg" last />}
-            {!nutrition.magnesium && !nutrition.iron && !nutrition.calcium && (
+            {nutrition.calcium !== undefined ? (
+              <NutrientRow label="Calcium" value={nutrition.calcium} unit="mg" />
+            ) : null}
+            {nutrition.iron !== undefined ? (
+              <NutrientRow label="Iron" value={nutrition.iron} unit="mg" />
+            ) : null}
+            {nutrition.magnesium !== undefined ? (
+              <NutrientRow
+                label="Magnesium"
+                value={nutrition.magnesium}
+                unit="mg"
+                last
+              />
+            ) : !nutrition.iron && !nutrition.calcium ? (
               <NutrientRow label="Salt" value={nutrition.salt} last />
-            )}
+            ) : null}
           </Card>
         </View>
 
-        {/* ── Additives ─────────────────────────────────────────────────── */}
         {product.additives?.length > 0 ? (
           <View style={s.section}>
             <SectionHeader title="Additives" />
             <Card style={s.cardNoPad}>
-              {product.additives.map((a: any, i: number) => (
+              {product.additives.map((additive: any, index: number) => (
                 <View
-                  key={a.code}
-                  style={[s.additiveRow, i < product.additives.length - 1 && s.additiveBorder]}>
-                  <Text style={s.additiveCode}>{a.code}</Text>
-                  <Text style={s.additiveName} numberOfLines={1}>{a.name ?? a.code}</Text>
-                  <View style={[s.riskChip,
-                    a.riskLevel === "low" && s.riskLow,
-                    a.riskLevel === "moderate" && s.riskMid,
-                    a.riskLevel === "high" && s.riskHigh,
+                  key={additive.code}
+                  style={[
+                    s.additiveRow,
+                    index < product.additives.length - 1 && s.additiveBorder,
                   ]}>
-                    <Text style={s.riskChipText}>{a.riskLevel}</Text>
+                  <Text style={s.additiveCode}>{additive.code}</Text>
+                  <Text style={s.additiveName} numberOfLines={1}>
+                    {additive.name ?? additive.code}
+                  </Text>
+                  <View
+                    style={[
+                      s.riskChip,
+                      additive.riskLevel === "low" && s.riskLow,
+                      additive.riskLevel === "moderate" && s.riskMid,
+                      additive.riskLevel === "high" && s.riskHigh,
+                    ]}>
+                    <Text style={s.riskChipText}>{additive.riskLevel}</Text>
                   </View>
                 </View>
               ))}
@@ -311,30 +374,38 @@ export default function ProductSheet() {
           </View>
         ) : null}
 
-        {/* ── Production (placeholder) ──────────────────────────────────── */}
         <View style={s.section}>
           <SectionHeader title="Production" />
-          <Card>
-            <View style={s.productionPlaceholder}>
-              <SymbolView name="globe.europe.africa.fill" style={s.productionIcon} tintColor={ios26Colors.surfaceHigh} />
-              <Text style={s.productionPlaceholderText}>Supply chain data coming soon</Text>
+          <Pressable
+            onPress={() => router.push("/product/production")}
+            style={({ pressed }) => [s.card, s.productionRow, pressed && s.productionRowPressed]}>
+            <SymbolView
+              name="globe.europe.africa.fill"
+              style={s.productionIcon}
+              tintColor={ios26Colors.textMuted}
+              type="hierarchical"
+            />
+            <View style={s.productionText}>
+              <Text style={s.productionTitle}>Supply chain</Text>
+              <Text style={s.productionSub}>Origin, manufacturing & logistics</Text>
             </View>
-          </Card>
+            <Text style={s.productionChevron}>{">"}</Text>
+          </Pressable>
         </View>
 
-        {/* ── Ecological footprint ──────────────────────────────────────── */}
         <View style={s.section}>
           <SectionHeader title="Ecological Footprint" />
           <Card>
             <Text style={s.co2Label}>Distance traveled</Text>
-            <Text style={s.co2Value}>{co2Distance} <Text style={s.co2Unit}>km</Text></Text>
+            <Text style={s.co2Value}>
+              {co2Distance} <Text style={s.co2Unit}>km</Text>
+            </Text>
             <View style={s.co2Bar}>
               <View style={s.co2BarFill} />
             </View>
           </Card>
         </View>
 
-        {/* ── Producer ──────────────────────────────────────────────────── */}
         <View style={s.section}>
           <SectionHeader title="Producer" />
           <Card style={s.producerCard}>
@@ -358,7 +429,6 @@ export default function ProductSheet() {
           </Card>
         </View>
 
-        {/* ── Batch ─────────────────────────────────────────────────────── */}
         {batch ? (
           <View style={s.section}>
             <SectionHeader title="Batch traceability" />
@@ -376,25 +446,26 @@ export default function ProductSheet() {
               {batch.manufacturedAt ? (
                 <View style={s.batchCell}>
                   <Text style={s.batchKey}>Manufactured</Text>
-                  <Text style={s.batchVal}>{new Date(batch.manufacturedAt).toLocaleDateString()}</Text>
+                  <Text style={s.batchVal}>
+                    {new Date(batch.manufacturedAt).toLocaleDateString()}
+                  </Text>
                 </View>
               ) : null}
               {batch.bestBeforeAt ? (
                 <View style={s.batchCell}>
                   <Text style={s.batchKey}>Best before</Text>
-                  <Text style={s.batchVal}>{new Date(batch.bestBeforeAt).toLocaleDateString()}</Text>
+                  <Text style={s.batchVal}>
+                    {new Date(batch.bestBeforeAt).toLocaleDateString()}
+                  </Text>
                 </View>
               ) : null}
             </View>
           </View>
         ) : null}
-
       </ScrollView>
-    </View>
+    </>
   );
 }
-
-// ── Styles ────────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
   root: {
@@ -407,31 +478,31 @@ const s = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 32,
   },
-
-  // ── Close button ────────────────────────────────────────────────────────
-  closeBtn: {
-    position: "absolute",
-    top: 14,
-    right: 14,
-    zIndex: 10,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center",
-    justifyContent: "center",
+  headerAction: {
+    fontSize: 17,
+    fontWeight: "600",
   },
-  closeIcon: { width: 14, height: 14 },
-
-  // ── Loading / not-found ─────────────────────────────────────────────────
+  headerActionPressed: {
+    opacity: 0.72,
+  },
   loadingText: {
     color: ios26Colors.textMuted,
     fontSize: 15,
     marginTop: 12,
   },
-  nfIcon: { width: 56, height: 56 },
-  nfTitle: { color: ios26Colors.textPrimary, fontSize: 20, fontWeight: "700" },
-  nfSub: { color: ios26Colors.textMuted, fontSize: 13 },
+  nfIcon: {
+    width: 56,
+    height: 56,
+  },
+  nfTitle: {
+    color: ios26Colors.textPrimary,
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  nfSub: {
+    color: ios26Colors.textMuted,
+    fontSize: 13,
+  },
   nfBtn: {
     marginTop: 8,
     paddingVertical: 12,
@@ -439,9 +510,11 @@ const s = StyleSheet.create({
     borderRadius: ios26Radii.pill,
     backgroundColor: ios26Colors.surfaceElevated,
   },
-  nfBtnText: { color: ios26Colors.textPrimary, fontSize: 15, fontWeight: "600" },
-
-  // ── Hero ────────────────────────────────────────────────────────────────
+  nfBtnText: {
+    color: ios26Colors.textPrimary,
+    fontSize: 15,
+    fontWeight: "600",
+  },
   heroCard: {
     backgroundColor: ios26Colors.surface,
     marginBottom: 8,
@@ -458,7 +531,10 @@ const s = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  heroPlaceholderIcon: { width: 64, height: 64 },
+  heroPlaceholderIcon: {
+    width: 64,
+    height: 64,
+  },
   nutriBadge: {
     position: "absolute",
     bottom: 14,
@@ -529,8 +605,6 @@ const s = StyleSheet.create({
     paddingBottom: 18,
     flexWrap: "wrap",
   },
-
-  // ── Sections ────────────────────────────────────────────────────────────
   section: {
     paddingHorizontal: 20,
     marginBottom: 8,
@@ -544,8 +618,6 @@ const s = StyleSheet.create({
     marginBottom: 8,
     marginTop: 16,
   },
-
-  // ── Card ────────────────────────────────────────────────────────────────
   card: {
     backgroundColor: ios26Colors.surfaceElevated,
     borderRadius: ios26Radii.card,
@@ -555,8 +627,6 @@ const s = StyleSheet.create({
     padding: 0,
     overflow: "hidden",
   },
-
-  // ── Scores ──────────────────────────────────────────────────────────────
   scorePill: {
     minWidth: 80,
     borderRadius: ios26Radii.md,
@@ -565,18 +635,26 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 2,
   },
-  scoreLetter: { fontSize: 28, fontWeight: "800", lineHeight: 32 },
-  scoreLabel: { fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
-  scoreNote: { fontSize: 10, textAlign: "center" },
-
-  // ── Ingredients ─────────────────────────────────────────────────────────
+  scoreLetter: {
+    fontSize: 28,
+    fontWeight: "800",
+    lineHeight: 32,
+  },
+  scoreLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  scoreNote: {
+    fontSize: 10,
+    textAlign: "center",
+  },
   ingredientsText: {
     color: ios26Colors.textMuted,
     fontSize: 14,
     lineHeight: 22,
   },
-
-  // ── Nutrition rows ──────────────────────────────────────────────────────
   nutriRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -587,13 +665,26 @@ const s = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: ios26Colors.separator,
   },
-  nutriRowSub: { paddingLeft: 32 },
-  nutriLabel: { fontSize: 15, color: ios26Colors.textMuted },
-  nutriValue: { fontSize: 15, color: ios26Colors.textMuted, fontVariant: ["tabular-nums"] },
-  nutriBold: { color: ios26Colors.textPrimary, fontWeight: "600" },
-  nutriMuted: { fontSize: 14, color: ios26Colors.surfaceHigh },
-
-  // ── Additives ───────────────────────────────────────────────────────────
+  nutriRowSub: {
+    paddingLeft: 32,
+  },
+  nutriLabel: {
+    fontSize: 15,
+    color: ios26Colors.textMuted,
+  },
+  nutriValue: {
+    fontSize: 15,
+    color: ios26Colors.textMuted,
+    fontVariant: ["tabular-nums"],
+  },
+  nutriBold: {
+    color: ios26Colors.textPrimary,
+    fontWeight: "600",
+  },
+  nutriMuted: {
+    fontSize: 14,
+    color: ios26Colors.surfaceHigh,
+  },
   additiveRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -605,32 +696,85 @@ const s = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: ios26Colors.separator,
   },
-  additiveCode: { width: 42, color: ios26Colors.accent, fontSize: 13, fontWeight: "700" },
-  additiveName: { flex: 1, color: ios26Colors.textMuted, fontSize: 14 },
+  additiveCode: {
+    width: 42,
+    color: ios26Colors.accent,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  additiveName: {
+    flex: 1,
+    color: ios26Colors.textMuted,
+    fontSize: 14,
+  },
   riskChip: {
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     backgroundColor: ios26Colors.surfaceElevated,
   },
-  riskLow: { backgroundColor: "rgba(48,209,88,0.14)" },
-  riskMid: { backgroundColor: "rgba(255,159,10,0.14)" },
-  riskHigh: { backgroundColor: "rgba(255,69,58,0.14)" },
-  riskChipText: { fontSize: 11, fontWeight: "600", color: ios26Colors.textMuted, textTransform: "capitalize" },
-
-  // ── Production placeholder ──────────────────────────────────────────────
-  productionPlaceholder: {
-    alignItems: "center",
-    paddingVertical: 24,
-    gap: 10,
+  riskLow: {
+    backgroundColor: "rgba(48,209,88,0.14)",
   },
-  productionIcon: { width: 44, height: 44 },
-  productionPlaceholderText: { color: ios26Colors.textMuted, fontSize: 14 },
-
-  // ── CO₂ ─────────────────────────────────────────────────────────────────
-  co2Label: { fontSize: 13, color: ios26Colors.textMuted, marginBottom: 4 },
-  co2Value: { fontSize: 40, fontWeight: "700", color: ios26Colors.textPrimary, letterSpacing: -1 },
-  co2Unit: { fontSize: 22, fontWeight: "500", letterSpacing: 0 },
+  riskMid: {
+    backgroundColor: "rgba(255,159,10,0.14)",
+  },
+  riskHigh: {
+    backgroundColor: "rgba(255,69,58,0.14)",
+  },
+  riskChipText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: ios26Colors.textMuted,
+    textTransform: "capitalize",
+  },
+  productionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    padding: 16,
+  },
+  productionRowPressed: {
+    backgroundColor: ios26Colors.surfaceHigh,
+  },
+  productionIcon: {
+    width: 32,
+    height: 32,
+  },
+  productionText: {
+    flex: 1,
+    gap: 3,
+  },
+  productionTitle: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#fff",
+  },
+  productionSub: {
+    fontSize: 13,
+    color: ios26Colors.textMuted,
+  },
+  productionChevron: {
+    fontSize: 20,
+    color: ios26Colors.textMuted,
+    fontWeight: "300",
+  },
+  co2Label: {
+    fontSize: 13,
+    color: ios26Colors.textMuted,
+    marginBottom: 4,
+  },
+  co2Value: {
+    fontSize: 40,
+    fontWeight: "700",
+    color: ios26Colors.textPrimary,
+    letterSpacing: -1,
+  },
+  co2Unit: {
+    fontSize: 22,
+    fontWeight: "500",
+    letterSpacing: 0,
+  },
   co2Bar: {
     height: 4,
     borderRadius: 2,
@@ -644,20 +788,32 @@ const s = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: ios26Colors.warning,
   },
-
-  // ── Producer ────────────────────────────────────────────────────────────
   producerCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-  producerLeft: { flex: 1, gap: 2 },
-  producerName: { fontSize: 16, fontWeight: "700", color: ios26Colors.textPrimary },
-  producerLegal: { fontSize: 12, color: ios26Colors.textMuted },
-  producerCountry: { fontSize: 13, color: ios26Colors.textMuted },
-  verifiedIcon: { width: 26, height: 26 },
-
-  // ── Batch ────────────────────────────────────────────────────────────────
+  producerLeft: {
+    flex: 1,
+    gap: 2,
+  },
+  producerName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ios26Colors.textPrimary,
+  },
+  producerLegal: {
+    fontSize: 12,
+    color: ios26Colors.textMuted,
+  },
+  producerCountry: {
+    fontSize: 13,
+    color: ios26Colors.textMuted,
+  },
+  verifiedIcon: {
+    width: 26,
+    height: 26,
+  },
   batchGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -678,5 +834,9 @@ const s = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.4,
   },
-  batchVal: { fontSize: 14, fontWeight: "600", color: ios26Colors.textPrimary },
+  batchVal: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: ios26Colors.textPrimary,
+  },
 });
