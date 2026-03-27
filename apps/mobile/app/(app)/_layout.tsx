@@ -1,5 +1,14 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { View, StyleSheet } from "react-native";
+
+function ScanTabIcon({ color, focused }: { color: string; focused: boolean }) {
+  return (
+    <View style={[styles.scanIcon, focused && styles.scanIconActive]}>
+      <Ionicons name="barcode-outline" size={22} color={focused ? "#fff" : "#636366"} />
+    </View>
+  );
+}
 
 export default function AppLayout() {
   return (
@@ -32,6 +41,20 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="scan"
+        options={{
+          title: "Scan",
+          tabBarIcon: ({ color, focused }) => (
+            <ScanTabIcon color={color} focused={focused} />
+          ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: "500",
+            color: "#636366",
+          },
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
@@ -43,3 +66,17 @@ export default function AppLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  scanIcon: {
+    width: 44,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: "#2C2C2E",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scanIconActive: {
+    backgroundColor: "#0A84FF",
+  },
+});
