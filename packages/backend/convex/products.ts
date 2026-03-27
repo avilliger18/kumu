@@ -14,16 +14,44 @@ export const resolveProductByScan = query({
     barcode: v.string(),
     batchCode: v.optional(v.string()),
   },
-  handler: async (_ctx, { barcode }) => {
-    // MOCK — always return Nutella regardless of scanned barcode
-    // TODO: swap in real DB lookup when catalog is populated
-    // const barcodeNorm = normalizeBarcode(barcode);
-    // const codeEntry = await ctx.db.query("productCodes")
-    //   .withIndex("by_code", q => q.eq("codeNormalized", barcodeNorm)).first();
-    // if (!codeEntry) return { resolutionStatus: "not_found" as const, barcode: barcodeNorm };
-    // ...
+  handler: async (ctx, { barcode }) => {
+    // Check real DB first
+    const barcodeNorm = normalizeBarcode(barcode);
+    const codeEntry = await ctx.db
+      .query("productCodes")
+      .withIndex("by_code", (q) => q.eq("codeNormalized", barcodeNorm))
+      .first();
 
-    void barcode;
+    if (codeEntry) {
+      const product = await ctx.db.get(codeEntry.productId);
+      if (product) {
+        const producer = await ctx.db.get(product.producerId);
+        return {
+          resolutionStatus: "found" as const,
+          supplyChainSteps: product.supplyChainSteps ?? [],
+          product: {
+            ...product,
+            brandLabel: producer?.displayName,
+            thumbnailUrl: undefined,
+            imageUrls: [],
+            allergens: product.allergens ?? { contains: [], mayContain: [], freeFrom: [] },
+            additives: product.additives ?? [],
+            labels: product.labels ?? [],
+            qualityScores: product.qualityScores ?? { overallFoodScore: 0 },
+            originCountries: product.originCountries ?? [],
+            marketCountries: product.marketCountries ?? [],
+          },
+          producer: producer ?? {
+            _id: product.producerId,
+            displayName: "Unknown",
+            name: "Unknown",
+          },
+          batch: null,
+        };
+      }
+    }
+
+    // Fall back to Nutella mock
 
     return {
       resolutionStatus: "found" as const,

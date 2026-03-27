@@ -62,11 +62,6 @@ export default function ProfilePage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-100">
       {/* background blobs */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-blue-200/40 blur-3xl" />
-        <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-indigo-200/30 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-sky-200/30 blur-3xl" />
-      </div>
 
       <div className="relative mx-auto flex min-h-screen max-w-lg flex-col px-5 py-10">
         <h1 className="mb-8 text-2xl font-semibold text-slate-500">Profile</h1>

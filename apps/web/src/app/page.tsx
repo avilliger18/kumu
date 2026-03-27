@@ -43,7 +43,7 @@ export default function SupplyChainGlobe() {
     const updateViewport = () => {
       setViewport({
         width: window.innerWidth,
-        height: Math.round(window.innerHeight * 0.7),
+        height: window.innerHeight,
       });
     };
 
@@ -154,6 +154,12 @@ export default function SupplyChainGlobe() {
                   className="flex cursor-pointer select-none items-center px-4 py-2.5 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:bg-slate-50"
                 >
                   History
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => router.push("/supplier")}
+                  className="flex cursor-pointer select-none items-center px-4 py-2.5 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:bg-slate-50"
+                >
+                  Become a Supplier
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="my-1 h-px bg-slate-100" />
                 <DropdownMenu.Item
@@ -351,7 +357,7 @@ export default function SupplyChainGlobe() {
             />
           </div>
 
-          <div className="absolute inset-x-0 bottom-0 flex h-[70vh] items-end justify-center">
+          <div className="absolute inset-0 flex items-center justify-center">
             <Globe
               ref={globeRef}
               width={Math.round(viewport.width * (showInfoBox ? 0.6 : 1))}
@@ -366,7 +372,7 @@ export default function SupplyChainGlobe() {
               arcEndLng={(d: any) => d.endLng}
               arcColor={() => "#ff459f"}
               arcAltitude={0.35}
-              arcStroke={1.2}
+              arcStroke={0.8}
               arcDashLength={0.4}
               arcDashGap={0.25}
               arcDashAnimateTime={2200}

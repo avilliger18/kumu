@@ -67,6 +67,30 @@ export const allergenSet = v.object({
   freeFrom: v.array(v.string()),
 });
 
+export const supplyChainStep = v.object({
+  step: v.number(),
+  type: v.union(
+    v.literal("plantation"),
+    v.literal("farm"),
+    v.literal("processing"),
+    v.literal("factory"),
+    v.literal("distribution"),
+  ),
+  label: v.string(),
+  location: v.string(),
+  lat: v.number(),
+  lng: v.number(),
+  ingredient: v.optional(v.string()),
+  transportMode: v.optional(
+    v.union(
+      v.literal("ship"),
+      v.literal("plane"),
+      v.literal("truck"),
+      v.literal("train"),
+    ),
+  ),
+});
+
 export const additive = v.object({
   code: v.string(),
   name: v.optional(v.string()),
@@ -110,6 +134,7 @@ export default defineSchema({
   }).index("by_tokenIdentifier", ["tokenIdentifier"]),
 
   producers: defineTable({
+    ownerTokenIdentifier: v.optional(v.string()),
     name: v.string(),
     displayName: v.string(),
     slug: v.string(),
@@ -141,7 +166,8 @@ export default defineSchema({
   })
     .index("by_slug", ["slug"])
     .index("by_name", ["name"])
-    .index("by_gs1_prefix", ["gs1CompanyPrefix"]),
+    .index("by_gs1_prefix", ["gs1CompanyPrefix"])
+    .index("by_owner", ["ownerTokenIdentifier"]),
 
   products: defineTable({
     producerId: v.id("producers"),
@@ -180,6 +206,7 @@ export default defineSchema({
     additives: v.optional(v.array(additive)),
     labels: v.optional(v.array(v.string())),
     qualityScores: v.optional(qualityScores),
+    supplyChainSteps: v.optional(v.array(supplyChainStep)),
     nutrition: v.object({
       referenceBasis: v.union(v.literal("100g"), v.literal("100ml")),
       per100: nutrientPanel,
