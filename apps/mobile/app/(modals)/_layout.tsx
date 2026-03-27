@@ -1,6 +1,10 @@
 import { Stack } from "expo-router";
 import { PlatformColor } from "react-native";
-import { ios26Colors, ios26StackScreenOptions } from "@/constants/ios26";
+import {
+  ios26BlurEffect,
+  ios26Colors,
+  ios26StackScreenOptions,
+} from "@/constants/ios26";
 
 const iosProfileColors = {
   background: PlatformColor("systemGroupedBackground") as unknown as string,
@@ -21,6 +25,8 @@ export default function ModalsLayout() {
           headerShown: true,
           title: "Profile",
           headerLargeTitle: true,
+          headerTransparent: true,
+          headerBlurEffect: ios26BlurEffect,
           headerShadowVisible: false,
           headerStyle: {
             backgroundColor: iosProfileColors.background,

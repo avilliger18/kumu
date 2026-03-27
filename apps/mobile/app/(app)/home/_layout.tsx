@@ -1,11 +1,11 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, Stack } from "expo-router";
 import { Pressable } from "react-native";
-import { ios26Colors, ios26StackScreenOptions } from "@/constants/ios26";
+import { ios26Colors, ios26GlassHeaderOptions } from "@/constants/ios26";
 
 export default function HomeLayout() {
   return (
-    <Stack screenOptions={ios26StackScreenOptions}>
+    <Stack screenOptions={ios26GlassHeaderOptions}>
       <Stack.Screen
         name="index"
         options={{
