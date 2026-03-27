@@ -2,6 +2,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Icon, Label, NativeTabs, VectorIcon } from "expo-router/unstable-native-tabs";
 import { ios26BlurEffect, ios26Colors } from "@/constants/ios26";
 
+export const unstable_settings = {
+  anchor: "globe",
+};
+
 export default function AppLayout() {
   return (
     <NativeTabs
