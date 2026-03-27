@@ -6,10 +6,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
 export default function VerifyScreen() {
   const { signIn } = useAuthActions();
@@ -27,11 +29,13 @@ export default function VerifyScreen() {
       setError("Enter the 6-digit code.");
       return;
     }
+
     setError(null);
     setLoading(true);
+
     try {
       await signIn("console-otp", { email, code });
-      // NavigationGuard in _layout.tsx handles redirect to (app)
+      router.replace("/(app)");
     } catch (e: any) {
       setError(e?.message ?? "Invalid code. Please try again.");
       setCode("");
@@ -46,6 +50,7 @@ export default function VerifyScreen() {
     setCode("");
     setResent(false);
     setResending(true);
+
     try {
       await signIn("console-otp", { email });
       setResent(true);
@@ -59,47 +64,31 @@ export default function VerifyScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-apple-bg"
+      className="flex-1"
+      style={styles.root}
     >
       <View className="flex-1 justify-center px-6">
-        {/* Back */}
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-          className="mb-10 self-start"
-        >
-          <Text className="text-apple-blue text-base">← Back</Text>
-        </Pressable>
-
-        {/* Header */}
-        <View className="mb-10">
-          <Text className="text-apple-text text-4xl font-bold tracking-tight mb-3">
-            Enter Code
-          </Text>
-          <Text className="text-apple-subtext text-base leading-relaxed">
+        <View style={styles.hero}>
+          <Text style={styles.title}>Check your code</Text>
+          <Text style={styles.subtitle}>
             We sent a 6-digit code to{"\n"}
-            <Text className="text-apple-text font-medium">{email}</Text>
+            <Text style={styles.email}>{email}</Text>
           </Text>
-          <Text className="text-apple-subtext text-sm mt-2">
-            Check the Convex dev server console.
-          </Text>
+          <Text style={styles.caption}>The code appears in the Convex dev server console.</Text>
         </View>
 
-        {/* OTP Input */}
-        <View className="bg-apple-surface rounded-2xl px-4 pt-3 pb-3 mb-3 border border-apple-border">
-          <Text className="text-apple-subtext text-xs mb-1 uppercase tracking-widest font-medium">
-            Verification Code
-          </Text>
+        <View style={styles.fieldCard}>
+          <Text style={styles.fieldLabel}>Verification code</Text>
           <TextInput
             ref={inputRef}
-            className="text-apple-text text-3xl tracking-[0.4em] font-mono"
+            style={styles.fieldInput}
             placeholder="000000"
-            placeholderTextColor="#38383A"
+            placeholderTextColor={ios26Colors.textMuted}
             keyboardType="number-pad"
             maxLength={6}
             value={code}
-            onChangeText={(t) => {
-              setCode(t);
+            onChangeText={(value) => {
+              setCode(value);
               if (error) setError(null);
             }}
             onSubmitEditing={handleVerify}
@@ -108,49 +97,142 @@ export default function VerifyScreen() {
           />
         </View>
 
-        {resent && !error && (
-          <Text className="text-apple-green text-sm mb-3 px-1">
-            New code sent — check the console.
-          </Text>
-        )}
+        {resent && !error ? (
+          <Text style={styles.success}>New code sent. Check the console.</Text>
+        ) : null}
 
         {error ? (
-          <Text className="text-apple-red text-sm mb-4 px-1">{error}</Text>
+          <Text style={styles.error}>{error}</Text>
         ) : (
-          <View className="mb-4" />
+          <View style={styles.errorSpacer} />
         )}
 
-        {/* Verify */}
         <Pressable
           onPress={handleVerify}
           disabled={loading || code.length < 6}
-          style={({ pressed }) => ({
-            opacity: pressed || loading || code.length < 6 ? 0.5 : 1,
-          })}
-          className="bg-apple-blue rounded-2xl py-4 items-center mb-4"
+          style={({ pressed }) => [
+            styles.primaryButton,
+            (pressed || loading || code.length < 6) && styles.disabled,
+          ]}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text className="text-white font-semibold text-base">Verify</Text>
+            <Text style={styles.primaryButtonText}>Verify</Text>
           )}
         </Pressable>
 
-        {/* Resend */}
         <Pressable
           onPress={handleResend}
           disabled={resending}
-          style={({ pressed }) => ({ opacity: pressed || resending ? 0.5 : 1 })}
-          className="items-center py-2"
+          style={({ pressed }) => [styles.linkButton, (pressed || resending) && styles.disabled]}
         >
-          <Text className="text-apple-subtext text-sm">
-            Didn't receive it?{" "}
-            <Text className="text-apple-blue">
-              {resending ? "Sending…" : "Resend code"}
-            </Text>
+          <Text style={styles.linkText}>
+            Did not receive it?{" "}
+            <Text style={styles.linkAccent}>{resending ? "Sending..." : "Resend code"}</Text>
           </Text>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    backgroundColor: ios26Colors.background,
+  },
+  hero: {
+    marginBottom: 36,
+  },
+  title: {
+    color: ios26Colors.textPrimary,
+    fontSize: 34,
+    fontWeight: "800",
+    lineHeight: 40,
+    letterSpacing: -0.5,
+    marginBottom: 12,
+  },
+  subtitle: {
+    color: ios26Colors.textSecondary,
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  email: {
+    color: ios26Colors.textPrimary,
+    fontWeight: "600",
+  },
+  caption: {
+    color: ios26Colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  fieldCard: {
+    borderRadius: ios26Radii.card,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 14,
+    marginBottom: 8,
+    backgroundColor: ios26Colors.surface,
+    borderWidth: 1,
+    borderColor: ios26Colors.separatorStrong,
+  },
+  fieldLabel: {
+    color: ios26Colors.textMuted,
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  fieldInput: {
+    color: ios26Colors.textPrimary,
+    fontSize: 30,
+    fontWeight: "700",
+    letterSpacing: 12,
+    fontVariant: ["tabular-nums"],
+  },
+  success: {
+    color: ios26Colors.success,
+    fontSize: 14,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  error: {
+    color: ios26Colors.danger,
+    fontSize: 14,
+    marginBottom: 18,
+    paddingHorizontal: 4,
+  },
+  errorSpacer: {
+    height: 24,
+  },
+  primaryButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: ios26Radii.pill,
+    paddingVertical: 16,
+    marginBottom: 14,
+    backgroundColor: ios26Colors.accentStrong,
+  },
+  primaryButtonText: {
+    color: ios26Colors.textPrimary,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  linkButton: {
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  linkText: {
+    color: ios26Colors.textSecondary,
+    fontSize: 14,
+  },
+  linkAccent: {
+    color: ios26Colors.accentStrong,
+    fontWeight: "600",
+  },
+  disabled: {
+    opacity: 0.56,
+  },
+});

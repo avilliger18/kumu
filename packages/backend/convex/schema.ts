@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export const nutrientPanel = v.object({
   energyKcal:          v.optional(v.number()),
@@ -78,6 +79,7 @@ export const qualityScores = v.object({
 });
 
 export default defineSchema({
+  ...authTables,
   producers: defineTable({
     name:               v.string(),
     displayName:        v.string(),

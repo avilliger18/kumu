@@ -1,21 +1,32 @@
 import "../global.css";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { ConvexReactClient } from "convex/react";
-import { useConvexAuth } from "convex/react";
+import { ThemeProvider } from "@react-navigation/native";
+import { ConvexReactClient, useConvexAuth } from "convex/react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import {
+  ios26Colors,
+  ios26NavigationTheme,
+  ios26SheetOptions,
+  ios26StackScreenOptions,
+} from "@/constants/ios26";
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
 
 const secureStorage = {
-  getItem:    (key: string) => SecureStore.getItemAsync(key),
-  setItem:    (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
   removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+};
+
+export const unstable_settings = {
+  anchor: "(app)",
 };
 
 function NavigationGuard() {
@@ -25,32 +36,53 @@ function NavigationGuard() {
 
   useEffect(() => {
     if (isLoading) return;
-    const inAuth = segments[0] === "(auth)";
-    if (!isAuthenticated && !inAuth) router.replace("/(auth)/sign-in");
-    else if (isAuthenticated && inAuth) router.replace("/(app)");
-  }, [isAuthenticated, isLoading, segments]);
+    const topSegment = segments[0];
+
+    if (!topSegment) return;
+
+    const inAuth = topSegment === "(auth)";
+    const inProtectedTree = topSegment === "(app)" || topSegment === "(modals)";
+
+    if (!isAuthenticated && inProtectedTree) {
+      router.replace("/sign-in");
+      return;
+    }
+
+    if (isAuthenticated && inAuth) {
+      router.replace("/(app)");
+    }
+  }, [isAuthenticated, isLoading, router, segments]);
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+    <Stack
+      screenOptions={{
+        ...ios26StackScreenOptions,
+        headerShown: false,
+        animation: "fade",
+      }}
+    >
+      <Stack.Screen name="index" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
       <Stack.Screen
-        name="product/[barcode]"
-        options={{
-          presentation: "formSheet",
-          headerShown: false,
-          contentStyle: { backgroundColor: "transparent" },
-        }}
+        name="(modals)/product/[barcode]"
+        options={ios26SheetOptions}
       />
     </Stack>
   );
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(ios26Colors.background).catch(() => {});
+  }, []);
+
   return (
     <ConvexAuthProvider client={convex} storage={secureStorage}>
-      <StatusBar style="light" />
-      <NavigationGuard />
+      <ThemeProvider value={ios26NavigationTheme}>
+        <StatusBar style="light" backgroundColor={ios26Colors.background} />
+        <NavigationGuard />
+      </ThemeProvider>
     </ConvexAuthProvider>
   );
 }
