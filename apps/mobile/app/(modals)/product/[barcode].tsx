@@ -1,17 +1,19 @@
 import { api } from "@kumu/backend/convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
+import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ProductHero from "@/components/product/product-hero";
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
 const nutriColors: Record<string, { bg: string; fg: string }> = {
@@ -46,8 +48,22 @@ function Row({
 
   return (
     <View style={[rowStyles.row, sub && rowStyles.sub]}>
-      <Text style={[rowStyles.label, bold && rowStyles.bold, sub && rowStyles.subText]}>{label}</Text>
-      <Text style={[rowStyles.value, bold && rowStyles.bold, sub && rowStyles.subText]}>
+      <Text
+        style={[
+          rowStyles.label,
+          bold && rowStyles.bold,
+          sub && rowStyles.subText,
+        ]}
+      >
+        {label}
+      </Text>
+      <Text
+        style={[
+          rowStyles.value,
+          bold && rowStyles.bold,
+          sub && rowStyles.subText,
+        ]}
+      >
         {Number.isInteger(value) ? value : value.toFixed(1)} {unit}
       </Text>
     </View>
@@ -102,7 +118,9 @@ function ScoreBadge({
       <Text
         style={[
           badgeStyles.label,
-          { color: fg === "#fff" ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.6)" },
+          {
+            color: fg === "#fff" ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.6)",
+          },
         ]}
       >
         {label}
@@ -111,7 +129,10 @@ function ScoreBadge({
         <Text
           style={[
             badgeStyles.desc,
-            { color: fg === "#fff" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.5)" },
+            {
+              color:
+                fg === "#fff" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.5)",
+            },
           ]}
         >
           {desc}
@@ -152,14 +173,57 @@ function SectionLabel({ title }: { title: string }) {
 }
 
 export default function ProductSheet() {
-  const { barcode } = useLocalSearchParams<{ barcode: string }>();
+  const { barcode, source } = useLocalSearchParams<{
+    barcode: string;
+    source?: string;
+  }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const recordScan = useMutation(api.products.recordScan);
+  const recorded = useRef<string | null>(null);
 
   const result = useQuery(
     api.products.resolveProductByScan,
     barcode ? { barcode } : "skip",
   );
+
+  const resolution = result as any;
+
+  useEffect(() => {
+    if (
+      !barcode ||
+      !resolution ||
+      source !== "scan" ||
+      recorded.current === barcode
+    ) {
+      return;
+    }
+
+    const payload =
+      resolution.resolutionStatus === "not_found"
+        ? {
+            sessionId: "mobile",
+            barcodeRaw: barcode,
+            resolutionStatus: "not_found" as const,
+            clientPlatform: Platform.OS,
+          }
+        : {
+            sessionId: "mobile",
+            barcodeRaw: barcode,
+            batchCodeRaw: resolution.batch?.batchCodeRaw,
+            resolutionStatus: resolution.batch
+              ? ("found" as const)
+              : ("found_no_batch" as const),
+            productTitle: resolution.product?.title,
+            productSubtitle: resolution.product?.subtitle,
+            productImageUrl: resolution.product?.thumbnailUrl,
+            producerDisplayName: resolution.producer?.displayName,
+            clientPlatform: Platform.OS,
+          };
+
+    recordScan(payload).catch(() => {});
+    recorded.current = barcode;
+  }, [barcode, recordScan, resolution, source]);
 
   if (result === undefined) {
     return (
@@ -169,15 +233,24 @@ export default function ProductSheet() {
     );
   }
 
-  const resolution = result as any;
-
   if (resolution.resolutionStatus === "not_found") {
     return (
       <View style={[styles.root, styles.center]}>
-        <SymbolView name="barcode" style={styles.notFoundIcon} tintColor={ios26Colors.textMuted} type="hierarchical" />
+        <SymbolView
+          name="barcode"
+          style={styles.notFoundIcon}
+          tintColor={ios26Colors.textMuted}
+          type="hierarchical"
+        />
         <Text style={styles.notFoundTitle}>Product not found</Text>
         <Text style={styles.notFoundSubtitle}>{barcode}</Text>
-        <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.notFoundButton, pressed && styles.pressed]}>
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => [
+            styles.notFoundButton,
+            pressed && styles.pressed,
+          ]}
+        >
           <Text style={styles.notFoundButtonText}>Go Back</Text>
         </Pressable>
       </View>
@@ -192,44 +265,19 @@ export default function ProductSheet() {
     <View style={styles.root}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 26, paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{
+          paddingTop: 26,
+          paddingBottom: insets.bottom + 40,
+        }}
       >
-        <View style={styles.hero}>
-          {product.thumbnailUrl ? (
-            <Image source={{ uri: product.thumbnailUrl }} style={styles.image} />
-          ) : (
-            <View style={[styles.image, styles.imageFallback]}>
-              <SymbolView name="shippingbox.fill" style={styles.imageFallbackIcon} tintColor={ios26Colors.textSecondary} type="hierarchical" />
-            </View>
-          )}
-
-          <Text style={styles.brand}>{product.brandLabel ?? producer.displayName}</Text>
-          <Text style={styles.title}>{product.title}</Text>
-          {product.subtitle ? <Text style={styles.subtitle}>{product.subtitle}</Text> : null}
-
-          <View style={styles.metaRow}>
-            {product.netContent ? (
-              <View style={styles.metaChip}>
-                <Text style={styles.metaChipText}>
-                  {product.netContent.value}
-                  {product.netContent.unit}
-                </Text>
-              </View>
-            ) : null}
-
-            {product.originCountries?.[0] ? (
-              <View style={styles.metaChip}>
-                <Text style={styles.metaChipText}>Made in {product.originCountries[0]}</Text>
-              </View>
-            ) : null}
-
-            {product.category ? (
-              <View style={styles.metaChip}>
-                <Text style={styles.metaChipText}>{product.category}</Text>
-              </View>
-            ) : null}
-          </View>
-        </View>
+        <ProductHero
+          title={product.title}
+          subtitle={product.subtitle}
+          imageUrl={product.thumbnailUrl}
+          batchCode={batch?.batchCodeRaw ?? barcode}
+          score={product.qualityScores?.overallFoodScore}
+          verified={producer.verificationStatus === "verified"}
+        />
 
         {qualityScores ? (
           <View style={styles.section}>
@@ -262,11 +310,18 @@ export default function ProductSheet() {
               ) : null}
             </View>
 
-            {qualityScores.additiveRiskScore !== undefined && qualityScores.additiveRiskScore > 0 ? (
+            {qualityScores.additiveRiskScore !== undefined &&
+            qualityScores.additiveRiskScore > 0 ? (
               <View style={styles.riskRow}>
-                <SymbolView name="exclamationmark.triangle" style={styles.riskIcon} tintColor={ios26Colors.warning} type="hierarchical" />
+                <SymbolView
+                  name="exclamationmark.triangle"
+                  style={styles.riskIcon}
+                  tintColor={ios26Colors.warning}
+                  type="hierarchical"
+                />
                 <Text style={styles.riskText}>
-                  {qualityScores.additiveRiskScore} additive{qualityScores.additiveRiskScore > 1 ? "s" : ""} with risk
+                  {qualityScores.additiveRiskScore} additive
+                  {qualityScores.additiveRiskScore > 1 ? "s" : ""} with risk
                 </Text>
               </View>
             ) : null}
@@ -275,16 +330,25 @@ export default function ProductSheet() {
 
         {batch?.recallStatus === "active" ? (
           <View style={styles.recallBanner}>
-            <SymbolView name="exclamationmark.octagon.fill" style={styles.recallIcon} tintColor={ios26Colors.danger} type="hierarchical" />
+            <SymbolView
+              name="exclamationmark.octagon.fill"
+              style={styles.recallIcon}
+              tintColor={ios26Colors.danger}
+              type="hierarchical"
+            />
             <View style={styles.recallCopy}>
               <Text style={styles.recallTitle}>Active Recall</Text>
-              <Text style={styles.recallSubtitle}>{batch.recallReason ?? "See manufacturer notice"}</Text>
+              <Text style={styles.recallSubtitle}>
+                {batch.recallReason ?? "See manufacturer notice"}
+              </Text>
             </View>
           </View>
         ) : null}
 
         <View style={styles.section}>
-          <SectionLabel title={`Nutrition - per ${product.nutrition?.referenceBasis ?? "100g"}`} />
+          <SectionLabel
+            title={`Nutrition - per ${product.nutrition?.referenceBasis ?? "100g"}`}
+          />
           <View style={styles.card}>
             <Row label="Energy" value={nutrition.energyKcal} unit="kcal" bold />
             <Row label="Fat" value={nutrition.fat} bold />
@@ -304,7 +368,12 @@ export default function ProductSheet() {
             <Row label="Vitamin C" value={nutrition.vitaminC} unit="mg" />
             <Row label="Vitamin D" value={nutrition.vitaminD} unit="mcg" />
             {(nutrition.additionalNutrients ?? []).map((item: any) => (
-              <Row key={item.name} label={item.name} value={item.value} unit={item.unit} />
+              <Row
+                key={item.name}
+                label={item.name}
+                value={item.value}
+                unit={item.unit}
+              />
             ))}
           </View>
         </View>
@@ -313,7 +382,9 @@ export default function ProductSheet() {
           <View style={styles.section}>
             <SectionLabel title="Ingredients" />
             <View style={styles.card}>
-              <Text style={styles.ingredientsText}>{product.ingredientsText}</Text>
+              <Text style={styles.ingredientsText}>
+                {product.ingredientsText}
+              </Text>
             </View>
           </View>
         ) : null}
@@ -324,7 +395,12 @@ export default function ProductSheet() {
             <View style={styles.card}>
               {product.allergens.contains.length > 0 ? (
                 <View style={styles.allergenRow}>
-                  <View style={[styles.allergenDot, { backgroundColor: ios26Colors.warning }]} />
+                  <View
+                    style={[
+                      styles.allergenDot,
+                      { backgroundColor: ios26Colors.warning },
+                    ]}
+                  />
                   <Text style={[styles.allergenText, styles.allergenContains]}>
                     Contains: {product.allergens.contains.join(", ")}
                   </Text>
@@ -333,7 +409,12 @@ export default function ProductSheet() {
 
               {product.allergens.mayContain.length > 0 ? (
                 <View style={styles.allergenRow}>
-                  <View style={[styles.allergenDot, { backgroundColor: ios26Colors.textMuted }]} />
+                  <View
+                    style={[
+                      styles.allergenDot,
+                      { backgroundColor: ios26Colors.textMuted },
+                    ]}
+                  />
                   <Text style={styles.allergenText}>
                     May contain: {product.allergens.mayContain.join(", ")}
                   </Text>
@@ -342,7 +423,12 @@ export default function ProductSheet() {
 
               {product.allergens.freeFrom.length > 0 ? (
                 <View style={styles.allergenRow}>
-                  <View style={[styles.allergenDot, { backgroundColor: ios26Colors.success }]} />
+                  <View
+                    style={[
+                      styles.allergenDot,
+                      { backgroundColor: ios26Colors.success },
+                    ]}
+                  />
                   <Text style={[styles.allergenText, styles.allergenFree]}>
                     Free from: {product.allergens.freeFrom.join(", ")}
                   </Text>
@@ -359,7 +445,9 @@ export default function ProductSheet() {
               {product.additives.map((additive: any) => (
                 <View key={additive.code} style={styles.additiveRow}>
                   <Text style={styles.additiveCode}>{additive.code}</Text>
-                  <Text style={styles.additiveName}>{additive.name ?? additive.code}</Text>
+                  <Text style={styles.additiveName}>
+                    {additive.name ?? additive.code}
+                  </Text>
                   <View
                     style={[
                       styles.riskBadge,
@@ -370,7 +458,9 @@ export default function ProductSheet() {
                           : styles.riskHigh,
                     ]}
                   >
-                    <Text style={styles.riskBadgeText}>{additive.riskLevel}</Text>
+                    <Text style={styles.riskBadgeText}>
+                      {additive.riskLevel}
+                    </Text>
                   </View>
                 </View>
               ))}
@@ -397,14 +487,18 @@ export default function ProductSheet() {
               {batch.manufacturedAt ? (
                 <View style={styles.batchCell}>
                   <Text style={styles.batchKey}>Manufactured</Text>
-                  <Text style={styles.batchValue}>{new Date(batch.manufacturedAt).toLocaleDateString()}</Text>
+                  <Text style={styles.batchValue}>
+                    {new Date(batch.manufacturedAt).toLocaleDateString()}
+                  </Text>
                 </View>
               ) : null}
 
               {batch.bestBeforeAt ? (
                 <View style={styles.batchCell}>
                   <Text style={styles.batchKey}>Best before</Text>
-                  <Text style={styles.batchValue}>{new Date(batch.bestBeforeAt).toLocaleDateString()}</Text>
+                  <Text style={styles.batchValue}>
+                    {new Date(batch.bestBeforeAt).toLocaleDateString()}
+                  </Text>
                 </View>
               ) : null}
 
@@ -424,11 +518,20 @@ export default function ProductSheet() {
             <View style={styles.producerCopy}>
               <Text style={styles.producerName}>{producer.displayName}</Text>
               <Text style={styles.producerLegal}>{producer.name}</Text>
-              {producer.countryCode ? <Text style={styles.producerCountry}>{producer.countryCode}</Text> : null}
+              {producer.countryCode ? (
+                <Text style={styles.producerCountry}>
+                  {producer.countryCode}
+                </Text>
+              ) : null}
             </View>
             {producer.verificationStatus === "verified" ? (
               <View style={styles.verifiedBadge}>
-                <SymbolView name="checkmark.seal.fill" style={styles.verifiedIcon} tintColor={ios26Colors.success} type="hierarchical" />
+                <SymbolView
+                  name="checkmark.seal.fill"
+                  style={styles.verifiedIcon}
+                  tintColor={ios26Colors.success}
+                  type="hierarchical"
+                />
               </View>
             ) : null}
           </View>
@@ -474,67 +577,6 @@ const styles = StyleSheet.create({
   notFoundButtonText: {
     color: ios26Colors.textPrimary,
     fontSize: 15,
-    fontWeight: "600",
-  },
-  hero: {
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingBottom: 12,
-  },
-  image: {
-    width: 124,
-    height: 124,
-    borderRadius: 26,
-    marginBottom: 18,
-    backgroundColor: "#fff",
-  },
-  imageFallback: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: ios26Colors.surface,
-  },
-  imageFallbackIcon: {
-    width: 42,
-    height: 42,
-  },
-  brand: {
-    color: ios26Colors.textMuted,
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 1.1,
-    marginBottom: 6,
-  },
-  title: {
-    color: ios26Colors.textPrimary,
-    fontSize: 28,
-    fontWeight: "800",
-    lineHeight: 34,
-    textAlign: "center",
-    letterSpacing: -0.4,
-    marginBottom: 4,
-  },
-  subtitle: {
-    color: ios26Colors.textSecondary,
-    fontSize: 15,
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  metaRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 8,
-  },
-  metaChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: ios26Radii.pill,
-    backgroundColor: ios26Colors.surface,
-  },
-  metaChipText: {
-    color: ios26Colors.textSecondary,
-    fontSize: 12,
     fontWeight: "600",
   },
   section: {

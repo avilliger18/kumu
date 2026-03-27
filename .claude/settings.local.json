@@ -5,7 +5,8 @@
       "WebFetch(domain:docs.expo.dev)",
       "WebSearch",
       "WebFetch(domain:www.nativewind.dev)",
-      "Bash(bun add:*)"
+      "Bash(bun add:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

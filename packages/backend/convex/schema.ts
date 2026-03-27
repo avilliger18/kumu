@@ -101,8 +101,8 @@ export default defineSchema({
   ...authTables,
   profiles: defineTable({
     tokenIdentifier: v.string(),
-    firstName: v.string(),
-    lastName: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     name: v.string(),
     email: v.optional(v.string()),
     createdAt: v.number(),
@@ -264,6 +264,7 @@ export default defineSchema({
 
   productScans: defineTable({
     sessionId: v.string(),
+    userTokenIdentifier: v.optional(v.string()),
     barcodeRaw: v.string(),
     barcodeNormalized: v.string(),
     batchCodeRaw: v.optional(v.string()),
@@ -271,6 +272,10 @@ export default defineSchema({
     productId: v.optional(v.id("products")),
     batchId: v.optional(v.id("productBatches")),
     producerId: v.optional(v.id("producers")),
+    productTitle: v.optional(v.string()),
+    productSubtitle: v.optional(v.string()),
+    productImageUrl: v.optional(v.string()),
+    producerDisplayName: v.optional(v.string()),
     resolutionStatus: v.union(
       v.literal("found"),
       v.literal("found_no_batch"),
@@ -280,6 +285,7 @@ export default defineSchema({
     scannedAt: v.number(),
   })
     .index("by_session", ["sessionId"])
+    .index("by_user_scannedAt", ["userTokenIdentifier", "scannedAt"])
     .index("by_product", ["productId"])
     .index("by_batch", ["batchId"])
     .index("by_scannedAt", ["scannedAt"]),

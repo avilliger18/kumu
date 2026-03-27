@@ -1,8 +1,7 @@
-import { Link, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { PlatformColor } from "react-native";
-import { Pressable } from "react-native";
-import { SymbolView } from "expo-symbols";
 import { ios26Colors, ios26StackScreenOptions } from "@/constants/ios26";
+import ModalCloseButton from "@/components/common/modal-close-button";
 
 const iosProfileColors = {
   background: "#1C1C1E",
@@ -27,27 +26,7 @@ export default function ModalsLayout() {
           headerLargeTitle: false,
           headerShadowVisible: false,
           headerLeft: () => (
-            <Link href=".." asChild>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Close profile"
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: iosProfileColors.button,
-                }}
-              >
-                <SymbolView
-                  name="xmark"
-                  style={{ width: 18, height: 18 }}
-                  tintColor={iosProfileColors.label}
-                  type="hierarchical"
-                />
-              </Pressable>
-            </Link>
+            <ModalCloseButton backgroundColor={iosProfileColors.button} />
           ),
           headerStyle: {
             backgroundColor: iosProfileColors.background,
@@ -68,6 +47,17 @@ export default function ModalsLayout() {
       <Stack.Screen
         name="product/[barcode]"
         options={{
+          presentation: "modal",
+          headerShown: true,
+          title: "",
+          headerShadowVisible: false,
+          headerLeft: () => (
+            <ModalCloseButton backgroundColor={ios26Colors.surface} />
+          ),
+          headerStyle: {
+            backgroundColor: ios26Colors.sheet,
+          },
+          headerTintColor: iosProfileColors.label,
           contentStyle: { backgroundColor: ios26Colors.sheet },
         }}
       />

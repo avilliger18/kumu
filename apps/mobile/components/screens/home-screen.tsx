@@ -1,3 +1,5 @@
+import { api } from "@kumu/backend/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { Link } from "expo-router";
 import {
   PlatformColor,
@@ -7,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import ScanHistoryItem from "@/components/home/scan-history-item";
 
 const ios = {
   background: PlatformColor("systemGroupedBackground"),
@@ -18,39 +21,43 @@ const ios = {
   systemBlue: PlatformColor("systemBlue"),
 };
 
-const cards = [
-  {
-    title: "Products tracked",
-    value: "2,184",
-    detail: "Across 38 active batches",
-  },
-  { title: "Scans today", value: "146", detail: "12 pending verification" },
-  { title: "Alerts", value: "4", detail: "2 high-priority issues" },
-];
-
 export default function HomeScreen() {
+  const recentScans = useQuery(api.products.recentUserScans) ?? [];
+
   return (
     <ScrollView
       style={styles.scrollView}
       contentContainerStyle={styles.container}
     >
       <View style={styles.hero}>
-        <Text style={styles.eyebrow}>Operations</Text>
-        <Text style={styles.title}>Supply chain at a glance</Text>
+        <Text style={styles.eyebrow}>Recent</Text>
+        <Text style={styles.title}>Scan history</Text>
         <Text style={styles.subtitle}>
-          Track key activity and jump straight into scanning.
+          Your latest scanned products show up here.
         </Text>
       </View>
 
-      <View style={styles.grid}>
-        {cards.map((card) => (
-          <View key={card.title} style={styles.card}>
-            <Text style={styles.cardTitle}>{card.title}</Text>
-            <Text style={styles.cardValue}>{card.value}</Text>
-            <Text style={styles.cardDetail}>{card.detail}</Text>
-          </View>
-        ))}
-      </View>
+      {recentScans.length > 0 ? (
+        <View style={styles.list}>
+          {recentScans.map((scan) => (
+            <ScanHistoryItem
+              key={scan._id}
+              barcode={scan.barcodeRaw}
+              title={scan.productTitle}
+              subtitle={scan.productSubtitle || scan.producerDisplayName}
+              imageUrl={scan.productImageUrl}
+              scannedAt={scan.scannedAt}
+            />
+          ))}
+        </View>
+      ) : (
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyTitle}>No scans yet</Text>
+          <Text style={styles.emptyText}>
+            Scan a product and it will appear here.
+          </Text>
+        </View>
+      )}
 
       <Link href="/scan" asChild>
         <Pressable style={styles.scanButton}>
@@ -92,30 +99,26 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 21,
   },
-  grid: {
+  list: {
     gap: 12,
   },
-  card: {
+  emptyCard: {
     backgroundColor: ios.card,
     borderRadius: 18,
     padding: 16,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: ios.separator,
-    gap: 4,
+    gap: 6,
   },
-  cardTitle: {
-    color: ios.secondaryLabel,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  cardValue: {
+  emptyTitle: {
     color: ios.label,
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: "700",
   },
-  cardDetail: {
-    color: ios.tertiaryLabel,
-    fontSize: 13,
+  emptyText: {
+    color: ios.secondaryLabel,
+    fontSize: 15,
+    lineHeight: 21,
   },
   scanButton: {
     marginTop: 4,

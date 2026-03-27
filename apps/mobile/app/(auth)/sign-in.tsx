@@ -1,5 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -32,6 +33,7 @@ export default function SignInScreen() {
     setLoading(true);
 
     try {
+      await SecureStore.setItemAsync("kumu:last-email", trimmed);
       await signIn("console-otp", { email: trimmed });
       router.push({ pathname: "/verify", params: { email: trimmed } });
     } catch (e: any) {
@@ -52,7 +54,8 @@ export default function SignInScreen() {
           <Text style={styles.eyebrow}>Supply intelligence</Text>
           <Text style={styles.title}>Sign in to kumu</Text>
           <Text style={styles.subtitle}>
-            Use your email to receive a one-time code and enter the new iOS 26 navigation shell.
+            Use your email to receive a one-time code and enter the new iOS 26
+            navigation shell.
           </Text>
         </View>
 
@@ -98,7 +101,8 @@ export default function SignInScreen() {
         </Pressable>
 
         <Text style={styles.footnote}>
-          No password required. Check the Convex console for the code after you continue.
+          No password required. Check the Convex console for the code after you
+          continue.
         </Text>
       </View>
     </KeyboardAvoidingView>

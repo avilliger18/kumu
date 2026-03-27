@@ -1,5 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -34,6 +35,9 @@ export default function VerifyScreen() {
     setLoading(true);
 
     try {
+      if (email) {
+        await SecureStore.setItemAsync("kumu:last-email", email);
+      }
       await signIn("console-otp", { email, code });
       router.replace("/(app)");
     } catch (e: any) {
@@ -74,7 +78,9 @@ export default function VerifyScreen() {
             We sent a 6-digit code to{"\n"}
             <Text style={styles.email}>{email}</Text>
           </Text>
-          <Text style={styles.caption}>The code appears in the Convex dev server console.</Text>
+          <Text style={styles.caption}>
+            The code appears in the Convex dev server console.
+          </Text>
         </View>
 
         <View style={styles.fieldCard}>
@@ -125,11 +131,16 @@ export default function VerifyScreen() {
         <Pressable
           onPress={handleResend}
           disabled={resending}
-          style={({ pressed }) => [styles.linkButton, (pressed || resending) && styles.disabled]}
+          style={({ pressed }) => [
+            styles.linkButton,
+            (pressed || resending) && styles.disabled,
+          ]}
         >
           <Text style={styles.linkText}>
             Did not receive it?{" "}
-            <Text style={styles.linkAccent}>{resending ? "Sending..." : "Resend code"}</Text>
+            <Text style={styles.linkAccent}>
+              {resending ? "Sending..." : "Resend code"}
+            </Text>
           </Text>
         </Pressable>
       </View>
