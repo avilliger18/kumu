@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@auth/core": "0.37.0",
+    "@convex-dev/auth": "^0.0.91",
     "convex": "^1.29.3",
     "openai": "^6.9.1"
   },

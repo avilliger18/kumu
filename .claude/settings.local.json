@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:labs.convex.dev)",
+      "WebFetch(domain:docs.expo.dev)",
+      "WebSearch",
+      "WebFetch(domain:www.nativewind.dev)",
+      "Bash(bun add:*)"
+    ]
+  }
+}
