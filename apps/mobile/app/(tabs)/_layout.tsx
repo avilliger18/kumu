@@ -1,14 +1,9 @@
-import { Redirect, Tabs } from 'expo-router';
-import React from 'react';
+import { Redirect } from "expo-router";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/providers/auth-context';
+import { useAuth } from "@/providers/auth-context";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const { isAuthenticated, isLoading } = useAuth();
 
   if (!isLoading && !isAuthenticated) {
@@ -16,26 +11,21 @@ export default function TabLayout() {
   }
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
+    <NativeTabs minimizeBehavior="onScrollDown">
+      <NativeTabs.Trigger
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Overview",
+          icon: { sf: "house.fill", drawable: "home" },
         }}
       />
-      <Tabs.Screen
-        name="explore"
+      <NativeTabs.Trigger
+        name="scan"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Scan",
+          icon: { sf: "barcode.viewfinder", drawable: "qr_code_scanner" },
         }}
       />
-    </Tabs>
+    </NativeTabs>
   );
 }
