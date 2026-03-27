@@ -5,13 +5,12 @@ import { ConvexReactClient, useConvexAuth } from "convex/react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SystemUI from "expo-system-ui";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import {
   ios26Colors,
   ios26NavigationTheme,
-  ios26SheetOptions,
   ios26StackScreenOptions,
 } from "@/constants/ios26";
 
@@ -29,7 +28,7 @@ export const unstable_settings = {
   anchor: "(app)",
 };
 
-function NavigationGuard() {
+function RootNavigator() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -58,17 +57,21 @@ function NavigationGuard() {
       screenOptions={{
         ...ios26StackScreenOptions,
         headerShown: false,
-        animation: "fade",
       }}
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
-      <Stack.Screen
-        name="(modals)/product/[barcode]"
-        options={ios26SheetOptions}
-      />
+      <Stack.Screen name="(modals)" options={{ presentation: "modal" }} />
     </Stack>
+  );
+}
+
+function AppProviders({ children }: { children: ReactNode }) {
+  return (
+    <ConvexAuthProvider client={convex} storage={secureStorage}>
+      <ThemeProvider value={ios26NavigationTheme}>{children}</ThemeProvider>
+    </ConvexAuthProvider>
   );
 }
 
@@ -78,11 +81,9 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ConvexAuthProvider client={convex} storage={secureStorage}>
-      <ThemeProvider value={ios26NavigationTheme}>
-        <StatusBar style="light" backgroundColor={ios26Colors.background} />
-        <NavigationGuard />
-      </ThemeProvider>
-    </ConvexAuthProvider>
+    <AppProviders>
+      <StatusBar style="light" backgroundColor={ios26Colors.background} />
+      <RootNavigator />
+    </AppProviders>
   );
 }

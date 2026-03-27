@@ -1,9 +1,14 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Icon, Label, NativeTabs, VectorIcon } from "expo-router/unstable-native-tabs";
+import {
+  Icon,
+  Label,
+  NativeTabs,
+  VectorIcon,
+} from "expo-router/unstable-native-tabs";
 import { ios26BlurEffect, ios26Colors } from "@/constants/ios26";
 
 export const unstable_settings = {
-  anchor: "globe",
+  anchor: "home",
 };
 
 export default function AppLayout() {
@@ -33,11 +38,11 @@ export default function AppLayout() {
       shadowColor="rgba(0,0,0,0.35)"
       tintColor={ios26Colors.accentStrong}
     >
-      <NativeTabs.Trigger name="globe">
-        <Label>Globe</Label>
+      <NativeTabs.Trigger name="home">
+        <Label>Home</Label>
         <Icon
-          sf={{ default: "globe.europe.africa", selected: "globe.europe.africa.fill" }}
-          androidSrc={<VectorIcon family={Ionicons} name="earth-outline" />}
+          sf={{ default: "house", selected: "house.fill" }}
+          androidSrc={<VectorIcon family={Ionicons} name="home-outline" />}
         />
       </NativeTabs.Trigger>
 
@@ -46,14 +51,6 @@ export default function AppLayout() {
         <Icon
           sf={{ default: "barcode.viewfinder", selected: "barcode.viewfinder" }}
           androidSrc={<VectorIcon family={Ionicons} name="barcode-outline" />}
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="profile">
-        <Label>Profile</Label>
-        <Icon
-          sf={{ default: "person.crop.circle", selected: "person.crop.circle.fill" }}
-          androidSrc={<VectorIcon family={Ionicons} name="person-circle-outline" />}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

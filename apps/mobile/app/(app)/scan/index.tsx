@@ -49,11 +49,15 @@ export default function ScanScreen() {
           </View>
           <Text style={styles.permissionTitle}>Camera access</Text>
           <Text style={styles.permissionText}>
-            Allow camera access to scan barcodes and open the product sheet directly in the iOS 26 modal flow.
+            Allow camera access to scan barcodes and open the product screen in
+            a native iOS modal stack.
           </Text>
           <Pressable
             onPress={requestPermission}
-            style={({ pressed }) => [styles.permissionButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.permissionButton,
+              pressed && styles.pressed,
+            ]}
           >
             <Text style={styles.permissionButtonText}>Allow Camera</Text>
           </Pressable>
@@ -70,7 +74,15 @@ export default function ScanScreen() {
           facing="back"
           onBarcodeScanned={handleScan}
           barcodeScannerSettings={{
-            barcodeTypes: ["ean13", "ean8", "upc_a", "upc_e", "qr", "code128", "code39"],
+            barcodeTypes: [
+              "ean13",
+              "ean8",
+              "upc_a",
+              "upc_e",
+              "qr",
+              "code128",
+              "code39",
+            ],
           }}
         />
       )}
@@ -98,8 +110,12 @@ export default function ScanScreen() {
           type="hierarchical"
         />
         <View style={styles.bottomCopy}>
-          <Text style={styles.bottomTitle}>Product details open as a system sheet</Text>
-          <Text style={styles.bottomText}>Supports EAN, UPC, QR, Code 128, and Code 39.</Text>
+          <Text style={styles.bottomTitle}>
+            Product details open in a native modal stack
+          </Text>
+          <Text style={styles.bottomText}>
+            Supports EAN, UPC, QR, Code 128, and Code 39.
+          </Text>
         </View>
       </View>
     </View>
