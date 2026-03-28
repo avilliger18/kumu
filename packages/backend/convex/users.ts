@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { splitName } from "./utils";
 
 type AuthCtx = {
   auth: {
@@ -7,31 +8,6 @@ type AuthCtx = {
   };
   db: any;
 };
-
-function splitName(identity: {
-  name?: string;
-  givenName?: string;
-  familyName?: string;
-  nickname?: string;
-  email?: string;
-}) {
-  const fallback =
-    identity.email?.split("@")[0] || identity.nickname || "Profile";
-  const firstName =
-    identity.givenName?.trim() ||
-    identity.nickname?.trim() ||
-    (identity.name && identity.name.trim().split(/\s+/)[0]) ||
-    fallback;
-  const lastName =
-    identity.familyName?.trim() ||
-    (identity.name && identity.name.trim().split(/\s+/).slice(1).join(" ")) ||
-    "";
-  return {
-    firstName,
-    lastName,
-    name: [firstName, lastName].filter(Boolean).join(" ").trim() || fallback,
-  };
-}
 
 async function getCurrentIdentity(ctx: AuthCtx) {
   const identity = await ctx.auth.getUserIdentity();

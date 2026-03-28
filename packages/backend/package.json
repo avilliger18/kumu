@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "convex dev",
     "setup": "convex dev --until-success",
-    "typecheck": "tsc --noEmit -p convex"
+    "typecheck": "tsc --noEmit -p convex",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "author": "",
   "license": "ISC",
@@ -43,6 +45,7 @@
     "resend": "^6.9.4"
   },
   "devDependencies": {
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.1.2"
   }
 }

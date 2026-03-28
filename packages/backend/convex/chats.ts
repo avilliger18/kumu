@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { greetingMessage } from "./utils";
 
 async function requireUser(ctx: any) {
   const identity = await ctx.auth.getUserIdentity();
@@ -24,9 +25,7 @@ export const createSession = mutation({
       updatedAt: now,
     });
 
-    const greeting = productBarcode
-      ? `How can I assist you today? I can answer questions about ${title} — ingredients, nutrition, allergens, and more.`
-      : "Hi! Ask me anything about food, nutrition, or product ingredients.";
+    const greeting = greetingMessage(title, productBarcode);
 
     await ctx.db.insert("chatMessages", {
       sessionId,

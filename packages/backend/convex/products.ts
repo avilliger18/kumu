@@ -1,13 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-
-function normalizeBarcode(raw: string): string {
-  return raw.replace(/\D/g, "");
-}
-
-function normalizeBatchCode(raw: string): string {
-  return raw.trim().toUpperCase();
-}
+import { normalizeBarcode, normalizeBatchCode } from "./utils";
 
 export const resolveProductByScan = query({
   args: {
