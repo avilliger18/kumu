@@ -34,7 +34,7 @@ describe("cn", () => {
   it("combines conditional objects and strings", () => {
     const isActive = true;
     expect(cn("base", { active: isActive, disabled: false })).toBe(
-      "base active"
+      "base active",
     );
   });
 });

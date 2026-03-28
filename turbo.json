@@ -10,6 +10,9 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "test:run": {
+      "dependsOn": ["^test:run"]
+    },
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },

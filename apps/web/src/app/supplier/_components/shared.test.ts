@@ -3,7 +3,7 @@ import { calcFootprint } from "./shared";
 import type { SupplyStep } from "./shared";
 
 function makeStep(
-  overrides: Partial<SupplyStep> & { lat: number; lng: number }
+  overrides: Partial<SupplyStep> & { lat: number; lng: number },
 ): SupplyStep {
   return {
     step: 0,
@@ -64,7 +64,7 @@ describe("calcFootprint", () => {
       makeStep({ lat: 0, lng: 10 }),
     ];
     expect(calcFootprint(byPlane).co2PerTon).toBeGreaterThan(
-      calcFootprint(byShip).co2PerTon * 10
+      calcFootprint(byShip).co2PerTon * 10,
     );
   });
 
