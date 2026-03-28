@@ -31,10 +31,14 @@ export const resolveProductByScan = query({
           supplyChainSteps: product.supplyChainSteps ?? [],
           product: {
             ...product,
-            brandLabel: producer?.displayName,
-            thumbnailUrl: undefined,
-            imageUrls: [],
-            allergens: product.allergens ?? { contains: [], mayContain: [], freeFrom: [] },
+            brandLabel: producer?.displayName ?? product.brandLabel,
+            thumbnailUrl: product.thumbnailUrl,
+            imageUrls: product.imageUrls ?? [],
+            allergens: product.allergens ?? {
+              contains: [],
+              mayContain: [],
+              freeFrom: [],
+            },
             additives: product.additives ?? [],
             labels: product.labels ?? [],
             qualityScores: product.qualityScores ?? { overallFoodScore: 0 },
@@ -442,6 +446,165 @@ export const seedSampleData = mutation({
       occurredAt: new Date("2024-03-15").getTime(),
       actorType: "system",
       note: "Batch created from production line data.",
+    });
+
+    return { skipped: false, producerId, productId };
+  },
+});
+
+export const seedCocaColaZero = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db
+      .query("producers")
+      .withIndex("by_slug", (q) => q.eq("slug", "coca-cola-company"))
+      .first();
+    if (existing) return { skipped: true };
+
+    const now = Date.now();
+
+    const producerId = await ctx.db.insert("producers", {
+      name: "The Coca-Cola Company",
+      displayName: "Coca-Cola",
+      slug: "coca-cola-company",
+      roles: ["manufacturer", "brand_owner"],
+      website: "https://www.coca-cola.com",
+      countryCode: "US",
+      gs1CompanyPrefix: "5449000",
+      verificationStatus: "verified",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const productId = await ctx.db.insert("products", {
+      producerId,
+      title: "Coca-Cola Zero Sugar",
+      subtitle: "Carbonated Soft Drink",
+      brandLabel: "Coca-Cola",
+      thumbnailUrl:
+        "https://images.openfoodfacts.org/images/products/544/900/013/3328/front_en.254.400.jpg",
+      imageUrls: [
+        "https://images.openfoodfacts.org/images/products/544/900/013/3328/front_en.254.400.jpg",
+      ],
+      category: "Beverages",
+      subcategories: ["Soft Drinks", "Cola"],
+      description:
+        "Coca-Cola Zero Sugar delivers the great taste of Coca-Cola with zero sugar and zero calories.",
+      netContent: { value: 330, unit: "ml" },
+      originCountries: ["US"],
+      marketCountries: ["US", "DE", "FR", "GB", "CH", "AT"],
+      status: "active",
+      dataSource: "manual",
+      dataQuality: "verified",
+      primaryCodeNormalized: "5449000133328",
+      ingredientsText:
+        "Carbonated water, caramel colour (E150d), phosphoric acid, sweeteners (aspartame, acesulfame K), natural flavourings, caffeine.",
+      ingredients: [
+        { name: "Carbonated water", isOrganic: false },
+        { name: "Caramel colour (E150d)", isOrganic: false },
+        { name: "Phosphoric acid", isOrganic: false },
+        { name: "Aspartame", isOrganic: false },
+        { name: "Acesulfame K", isOrganic: false },
+        { name: "Natural flavourings", isOrganic: false },
+        { name: "Caffeine", isOrganic: false },
+      ],
+      allergens: {
+        contains: [],
+        mayContain: [],
+        freeFrom: ["gluten", "nuts", "milk"],
+      },
+      additives: [
+        { code: "E150d", name: "Caramel colour", riskLevel: "moderate" },
+        { code: "E338", name: "Phosphoric acid", riskLevel: "low" },
+        { code: "E951", name: "Aspartame", riskLevel: "moderate" },
+        { code: "E950", name: "Acesulfame K", riskLevel: "low" },
+      ],
+      labels: ["vegetarian", "vegan", "zero-sugar", "zero-calories"],
+      qualityScores: {
+        nutriScore: "B",
+        novaGroup: 4,
+        processingLevel: "Ultra-processed",
+        additiveRiskScore: 3,
+        overallFoodScore: 41,
+      },
+      nutrition: {
+        referenceBasis: "100ml",
+        per100: {
+          energyKcal: 0.3,
+          energyKj: 1,
+          fat: 0,
+          saturatedFat: 0,
+          carbs: 0,
+          sugars: 0,
+          fiber: 0,
+          protein: 0,
+          salt: 0.02,
+          sodium: 0.008,
+        },
+      },
+      packaging: {
+        type: "Can",
+        material: "Aluminium",
+        recyclable: true,
+        weightG: 330,
+      },
+      supplyChainSteps: [
+        {
+          step: 1,
+          type: "plantation",
+          label: "Sugar Beet Farm",
+          location: "Bavaria, Germany",
+          lat: 48.7904,
+          lng: 11.4979,
+          ingredient: "Sweeteners",
+          transportMode: "truck",
+        },
+        {
+          step: 2,
+          type: "processing",
+          label: "Caramel Colour Plant",
+          location: "Rotterdam, Netherlands",
+          lat: 51.9225,
+          lng: 4.4792,
+          ingredient: "Caramel colour (E150d)",
+          transportMode: "ship",
+        },
+        {
+          step: 3,
+          type: "factory",
+          label: "Coca-Cola Bottling Plant",
+          location: "Cologne, Germany",
+          lat: 50.938,
+          lng: 6.9603,
+          ingredient: "Manufacturing",
+          transportMode: "truck",
+        },
+        {
+          step: 4,
+          type: "distribution",
+          label: "EU Distribution Hub",
+          location: "Frankfurt, Germany",
+          lat: 50.1109,
+          lng: 8.6821,
+          ingredient: "Distribution",
+          transportMode: "truck",
+        },
+      ],
+      lastVerifiedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    await ctx.db.insert("productCodes", {
+      productId,
+      codeType: "ean13",
+      codeRaw: "5449000133328",
+      codeNormalized: "5449000133328",
+      isPrimary: true,
+      marketCountry: "EU",
+      source: "manual",
+      createdAt: now,
+      updatedAt: now,
     });
 
     return { skipped: false, producerId, productId };

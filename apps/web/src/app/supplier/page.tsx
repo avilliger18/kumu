@@ -1,9 +1,12 @@
 "use client";
 
 import { api } from "@kumu/backend/convex/_generated/api";
+import type { GenericId } from "convex/values";
 import { useMutation, useQuery } from "convex/react";
 import {
+  AlertTriangle,
   Building2,
+  CheckCircle,
   ChevronRight,
   Home,
   Package,
@@ -525,6 +528,192 @@ function ProductForm({
   );
 }
 
+// ─── alerts panel ─────────────────────────────────────────────────────────────
+
+const SEVERITY_STYLE = {
+  low:    { label: "Low",    bg: "bg-yellow-50",  text: "text-yellow-700",  border: "border-yellow-200" },
+  medium: { label: "Medium", bg: "bg-orange-50",  text: "text-orange-700",  border: "border-orange-200" },
+  high:   { label: "High",   bg: "bg-red-50",     text: "text-red-700",     border: "border-red-200"    },
+};
+
+type AlertProduct = {
+  _id: GenericId<"products">;
+  title: string;
+  supplyChainSteps?: SupplyStep[];
+};
+
+function AlertsPanel({ product, onClose }: { product: AlertProduct; onClose: () => void }) {
+  const createAlert  = useMutation(api.suppliers.createProductAlert);
+  const resolveAlert = useMutation(api.suppliers.resolveProductAlert);
+  const alerts = useQuery(api.suppliers.getAlertsForProduct, { productId: product._id });
+
+  const [showForm, setShowForm]             = useState(false);
+  const [stepIndex, setStepIndex]           = useState<string>("");
+  const [chargeNumber, setChargeNumber]     = useState("");
+  const [faultDescription, setFaultDescription] = useState("");
+  const [severity, setSeverity]             = useState<"low" | "medium" | "high">("medium");
+  const [saving, setSaving]                 = useState(false);
+  const [error, setError]                   = useState("");
+
+  const steps = product.supplyChainSteps ?? [];
+
+  const handleCreate = async () => {
+    if (!chargeNumber.trim()) return setError("Charge number is required.");
+    if (!faultDescription.trim()) return setError("Please describe the fault.");
+    setSaving(true);
+    setError("");
+    try {
+      const idx = stepIndex !== "" ? parseInt(stepIndex) : undefined;
+      await createAlert({
+        productId: product._id,
+        stepIndex: idx,
+        stepLabel: idx != null ? steps[idx]?.label : undefined,
+        chargeNumber,
+        faultDescription,
+        severity,
+      });
+      setFaultDescription("");
+      setStepIndex("");
+      setChargeNumber("");
+      setSeverity("medium");
+      setShowForm(false);
+    } catch (e: any) {
+      setError(e.message ?? "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-slate-800">Alerts</h2>
+          <p className="text-sm text-slate-400 mt-0.5">{product.title}</p>
+        </div>
+        <button onClick={onClose} className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* existing alerts */}
+      <div className="flex flex-col gap-3">
+        {alerts === undefined && <p className="text-sm text-slate-400">Loading…</p>}
+        {alerts?.length === 0 && (
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 py-10 text-center">
+            <AlertTriangle className="h-8 w-8 text-slate-300" />
+            <p className="text-sm text-slate-400">No alerts for this product.</p>
+          </div>
+        )}
+        {alerts?.map((alert) => {
+          const s = SEVERITY_STYLE[alert.severity];
+          return (
+            <div key={alert._id} className={`rounded-2xl border ${s.border} ${s.bg} p-4`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-xs font-semibold uppercase tracking-wide ${s.text}`}>
+                      {s.label} severity
+                    </span>
+                    {alert.stepLabel && (
+                      <span className="rounded-full bg-white/70 px-2 py-0.5 text-xs text-slate-600 border border-slate-200">
+                        Step: {alert.stepLabel}
+                      </span>
+                    )}
+                    {alert.status === "resolved" && (
+                      <span className="flex items-center gap-1 text-xs text-emerald-600">
+                        <CheckCircle className="h-3 w-3" /> Resolved
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1.5 text-sm text-slate-700">{alert.faultDescription}</p>
+                  {alert.chargeNumber && (
+                    <p className="mt-1 text-xs text-slate-500">
+                      Charge: <span className="font-medium">{alert.chargeNumber}</span>
+                    </p>
+                  )}
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    {new Date(alert.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                {alert.status === "open" && (
+                  <button
+                    onClick={() => resolveAlert({ alertId: alert._id })}
+                    className="shrink-0 rounded-xl border border-emerald-200 bg-white px-3 py-1.5 text-xs font-medium text-emerald-600 transition hover:bg-emerald-50"
+                  >
+                    Resolve
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* create form */}
+      {showForm ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <SectionHeader>New alert</SectionHeader>
+          <div className="flex flex-col gap-3">
+            <Field label="Charge / Lot number *">
+              <Inp
+                value={chargeNumber}
+                onChange={(e) => setChargeNumber(e.target.value)}
+                placeholder="e.g. L240901B"
+              />
+            </Field>
+            <Field label="Affected supply chain step (optional)">
+              <Sel value={stepIndex} onChange={(e) => setStepIndex(e.target.value)}>
+                <option value="">— general / no specific step —</option>
+                {steps.map((s, i) => (
+                  <option key={i} value={i}>
+                    {i + 1}. {s.label} ({s.location})
+                  </option>
+                ))}
+              </Sel>
+            </Field>
+            <Field label="Severity">
+              <Sel value={severity} onChange={(e) => setSeverity(e.target.value as "low" | "medium" | "high")}>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </Sel>
+            </Field>
+            <Field label="Fault description *">
+              <textarea
+                value={faultDescription}
+                onChange={(e) => setFaultDescription(e.target.value)}
+                placeholder="Describe the issue with this step or product…"
+                rows={3}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-[#ff459f] focus:ring-2 focus:ring-[#ff459f]/20 resize-none"
+              />
+            </Field>
+          </div>
+          {error && <p className="mt-2 rounded-xl bg-red-50 px-4 py-2 text-sm text-red-500">{error}</p>}
+          <div className="mt-4 flex gap-2 justify-end">
+            <button
+              onClick={() => { setShowForm(false); setError(""); }}
+              className="rounded-2xl px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <PinkButton onClick={handleCreate} disabled={saving}>
+              {saving ? "Saving…" : "Create alert"}
+            </PinkButton>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 self-start rounded-2xl bg-[#ff459f] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e83d8f]"
+        >
+          <Plus className="h-4 w-4" /> New alert
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── onboarding ───────────────────────────────────────────────────────────────
 
 function OnboardingForm() {
@@ -599,6 +788,7 @@ function SupplierDashboard({ producerName }: { producerName: string }) {
   const deleteProduct = useMutation(api.suppliers.deleteSupplierProduct);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ExistingProduct | null>(null);
+  const [alertingProduct, setAlertingProduct] = useState<AlertProduct | null>(null);
 
   if (showForm || editingProduct) {
     return (
@@ -607,6 +797,14 @@ function SupplierDashboard({ producerName }: { producerName: string }) {
           initialProduct={editingProduct ?? undefined}
           onClose={() => { setShowForm(false); setEditingProduct(null); }}
         />
+      </div>
+    );
+  }
+
+  if (alertingProduct) {
+    return (
+      <div className="mx-auto w-full max-w-2xl">
+        <AlertsPanel product={alertingProduct} onClose={() => setAlertingProduct(null)} />
       </div>
     );
   }
@@ -659,7 +857,14 @@ function SupplierDashboard({ producerName }: { producerName: string }) {
                   </div>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setEditingProduct(p as ExistingProduct)}
+                      onClick={() => setAlertingProduct({ _id: p._id, title: p.title, supplyChainSteps: p.supplyChainSteps as unknown as SupplyStep[] | undefined })}
+                      className="rounded-xl p-2 text-slate-400 transition hover:bg-orange-50 hover:text-orange-500"
+                      title="Alerts"
+                    >
+                      <AlertTriangle className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setEditingProduct(p as unknown as ExistingProduct)}
                       className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                       title="Edit"
                     >

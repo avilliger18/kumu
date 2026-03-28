@@ -46,7 +46,12 @@ export const becomeSupplier = mutation({
     const baseSlug = slugify(args.companyName);
     let slug = baseSlug;
     let attempt = 1;
-    while (await ctx.db.query("producers").withIndex("by_slug", (q) => q.eq("slug", slug)).unique()) {
+    while (
+      await ctx.db
+        .query("producers")
+        .withIndex("by_slug", (q) => q.eq("slug", slug))
+        .unique()
+    ) {
       slug = `${baseSlug}-${attempt++}`;
     }
 
@@ -198,7 +203,9 @@ export const updateSupplierProduct = mutation({
     if (!product || product.producerId.toString() !== producer._id.toString())
       throw new Error("Not your product");
 
-    const barcodeNorm = args.barcode ? args.barcode.replace(/\D/g, "") : undefined;
+    const barcodeNorm = args.barcode
+      ? args.barcode.replace(/\D/g, "")
+      : undefined;
 
     await ctx.db.patch(args.productId, {
       title: args.title.trim(),
@@ -254,6 +261,99 @@ export const getMyProducts = query({
     return await ctx.db
       .query("products")
       .withIndex("by_producer", (q) => q.eq("producerId", producer._id))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const createProductAlert = mutation({
+  args: {
+    productId: v.id("products"),
+    stepIndex: v.optional(v.number()),
+    stepLabel: v.optional(v.string()),
+    chargeNumber: v.optional(v.string()),
+    faultDescription: v.string(),
+    severity: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    const producer = await ctx.db
+      .query("producers")
+      .withIndex("by_owner", (q) =>
+        q.eq("ownerTokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique();
+    if (!producer) throw new Error("Not a supplier");
+
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.producerId.toString() !== producer._id.toString())
+      throw new Error("Not your product");
+
+    const now = Date.now();
+    return await ctx.db.insert("productAlerts", {
+      productId: args.productId,
+      producerId: producer._id,
+      stepIndex: args.stepIndex,
+      stepLabel: args.stepLabel,
+      chargeNumber: args.chargeNumber?.trim(),
+      faultDescription: args.faultDescription.trim(),
+      severity: args.severity,
+      status: "open",
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+export const resolveProductAlert = mutation({
+  args: { alertId: v.id("productAlerts") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    const producer = await ctx.db
+      .query("producers")
+      .withIndex("by_owner", (q) =>
+        q.eq("ownerTokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique();
+    if (!producer) throw new Error("Not a supplier");
+
+    const alert = await ctx.db.get(args.alertId);
+    if (!alert || alert.producerId.toString() !== producer._id.toString())
+      throw new Error("Not your alert");
+
+    await ctx.db.patch(args.alertId, {
+      status: "resolved",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const getAlertsForProduct = query({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    return await ctx.db
+      .query("productAlerts")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .order("desc")
+      .collect();
+  },
+});
+
+// Public — no auth required, only returns open alerts for consumer display
+export const getOpenAlertsForProduct = query({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("productAlerts")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .filter((q) => q.eq(q.field("status"), "open"))
       .order("desc")
       .collect();
   },

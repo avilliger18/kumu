@@ -317,6 +317,21 @@ export default defineSchema({
     .index("by_batch", ["batchId"])
     .index("by_scannedAt", ["scannedAt"]),
 
+  productAlerts: defineTable({
+    productId: v.id("products"),
+    producerId: v.id("producers"),
+    stepIndex: v.optional(v.number()),
+    stepLabel: v.optional(v.string()),
+    chargeNumber: v.optional(v.string()),
+    faultDescription: v.string(),
+    severity: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    status: v.union(v.literal("open"), v.literal("resolved")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_product", ["productId"])
+    .index("by_producer", ["producerId"]),
+
   trackingEvents: defineTable({
     productId: v.id("products"),
     batchId: v.optional(v.id("productBatches")),
