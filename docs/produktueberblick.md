@@ -1,10 +1,10 @@
-# Produktueberblick
+# Produktüberblick
 
 ## Problem
 
-Produktinformationen sind fuer Anwender oft verteilt, schwer verständlich und
+Produktinformationen sind für Anwender oft verteilt, schwer verständlich und
 nicht direkt mit Rückmeldungen aus der Lieferkette verbunden. Gleichzeitig
-brauchen Supplier eine einfache Moeglichkeit, Produktdaten, Lieferketteninfos
+brauchen Supplier eine einfache Möglichkeit, Produktdaten, Lieferketteninfos
 und Warnungen zentral zu pflegen.
 
 ## Ziel von Kumu
@@ -29,17 +29,17 @@ Kumu verbindet diese beiden Seiten:
 
 | Funktion        | Kanal          | Beschreibung                                            |
 | --------------- | -------------- | ------------------------------------------------------- |
-| OTP-Login       | Web und Mobile | Sign-in per E-Mail-Code ueber Convex Auth               |
-| Barcode-Scan    | Mobile         | Kamera-Scan oeffnet die Produktdetailseite              |
+| OTP-Login       | Web und Mobile | Sign-in per E-Mail-Code über Convex Auth                |
+| Barcode-Scan    | Mobile         | Kamera-Scan öffnet die Produktdetailseite               |
 | Produktdetail   | Mobile und Web | Produktinfos, Labels, Supply Chain, Footprint, Producer |
 | Verlauf         | Mobile         | Letzte Scans pro Nutzer                                 |
 | Chat            | Mobile         | Chat-Sessions pro Nutzer und Produkt                    |
 | Supplier-Portal | Web            | Firmenprofil, Produkte, Lieferkettenpflege und Alerts   |
 | Notifications   | Backend        | Fan-out von Produktwarnungen an betroffene Nutzer       |
 
-## Demo-Realitaet
+## Demo-Realität
 
-Kumu ist als echter Code und echte Deployment-Kette vorhanden. Fuer die Demo
+Kumu ist als echter Code und echte Deployment-Kette vorhanden. Für die Demo
 gilt aber bewusst:
 
 - Barcode-Ergebnisse sind gemockt
@@ -48,8 +48,8 @@ gilt aber bewusst:
 
 ## Nutzenversprechen
 
-- Anwender erhalten Produktkontext deutlich schneller als ueber klassische
+- Anwender erhalten Produktkontext deutlich schneller als über klassische
   Verpackungs- oder Suchlogik.
-- Supplier koennen Informationen und Warnungen direkt an einer Stelle pflegen.
+- Supplier können Informationen und Warnungen direkt an einer Stelle pflegen.
 - Das System zeigt, wie Scan, Lieferkette und Benachrichtigung in einem
   gemeinsamen Produkt zusammenspielen.

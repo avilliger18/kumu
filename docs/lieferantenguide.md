@@ -27,7 +27,7 @@ Funktion beschrieben werden.
 
 ## Produkte
 
-Supplier koennen Produkte anlegen, bearbeiten und löschen.
+Supplier können Produkte anlegen, bearbeiten und löschen.
 
 Aktuell pflegbare Felder:
 
@@ -37,11 +37,11 @@ Aktuell pflegbare Felder:
 - Beschreibung
 - Barcode
 - Zutaten
-- Naehrwerte pro 100g
+- Nährwerte pro 100g
 - Supply-Chain-Schritte
 
 Die Produktpflege ist bewusst funktional gehalten. Felder wie Bild-Upload,
-Zertifikatsmanagement oder vollstaendige Verpackungsdaten sind im aktuellen UI
+Zertifikatsmanagement oder vollständige Verpackungsdaten sind im aktuellen UI
 noch nicht ausgebaut.
 
 ## Supply-Chain-Daten
@@ -55,12 +55,12 @@ erfasst werden, zum Beispiel:
 - Geo-Koordinaten
 - optionaler Transportmodus
 
-Diese Daten werden fuer die Produktdarstellung und die Footprint-Berechnung
+Diese Daten werden für die Produktdarstellung und die Footprint-Berechnung
 verwendet.
 
 ## Alerts
 
-Im Alerts-Bereich koennen Supplier produktbezogene Warnungen anlegen.
+Im Alerts-Bereich können Supplier produktbezogene Warnungen anlegen.
 
 Aktuell relevante Felder:
 
@@ -76,5 +76,5 @@ wird.
 ## Was aktuell nicht im Web-Portal liegt
 
 Im aktuellen Repo gibt es keinen voll ausgebauten Supplier-Chat im Web-Portal.
-Chat-Sessions sind primar in der Mobile App sichtbar und backendseitig
+Chat-Sessions sind primär in der Mobile App sichtbar und backendseitig
 vorhanden.

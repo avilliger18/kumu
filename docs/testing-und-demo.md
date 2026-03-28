@@ -19,12 +19,12 @@ Aktueller Stand:
 Das bedeutet konkret:
 
 - Scans und Produktabfragen zeigen Demo-Daten
-- es gibt keine echte externe Produktaufloesung
-- die Demo ist fuer UX, Produktfluss und Architekturgedanken gedacht
+- es gibt keine echte externe Produktauflösung
+- die Demo ist für UX, Produktfluss und Architekturgedanken gedacht
 
 ## Aktuelle Root-CI
 
-Die Root-CI prueft derzeit genau diese drei Kommandos:
+Die Root-CI prüft derzeit genau diese drei Kommandos:
 
 - `bun run format:check`
 - `bun run lint`
@@ -37,21 +37,21 @@ Mehr sollte in diesem Dokument nicht als bereits aktiv behauptet werden.
 ### Web
 
 - Sign-in-Flow aufrufen
-- Company-Profil pruefen
+- Company-Profil prüfen
 - Produkt anlegen oder bearbeiten
-- Alert anlegen und aufloesen
+- Alert anlegen und auflösen
 
 ### Mobile
 
 - OTP-Flow anstossen
-- Scan-Screen oeffnen und Kamera pruefen
-- Produktdetail fuer Demo-Barcode aufrufen
-- Verlauf pruefen
+- Scan-Screen öffnen und Kamera prüfen
+- Produktdetail für Demo-Barcode aufrufen
+- Verlauf prüfen
 - Chat-Session starten
 
 ### Backend
 
-- Produktabfrage ueber Barcode
+- Produktabfrage über Barcode
 - Scan-Aufzeichnung
 - Alert-Erstellung
 - Notification-Fan-out
@@ -62,4 +62,4 @@ Die Demo ist bewusst ehrlich eingegrenzt:
 
 - kein falscher Anspruch auf echte globale Barcode-Verifikation
 - klare Trennung zwischen Testdaten und realem Produktziel
-- echter Code, echte Oberflaechen und echtes Deployment trotz Demo-Datenbasis
+- echter Code, echte Oberflächen und echtes Deployment trotz Demo-Datenbasis

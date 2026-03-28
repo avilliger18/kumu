@@ -3,18 +3,18 @@
 ## Kumu in einem Satz
 
 Kumu ist eine Lebensmittel-Transparenzplattform mit Barcode-Scan, Produktinfos,
-Lieferkettenkontext und einem Supplier-Portal fuer Produkt- und Alert-Pflege.
+Lieferkettenkontext und einem Supplier-Portal für Produkt- und Alert-Pflege.
 
-## Kurzueberblick
+## Kurzüberblick
 
 Kumu besteht aktuell aus drei Kernteilen:
 
-- Web-App fuer Supplier-Workflows und die veröffentlichte Demo
-- Mobile App fuer Scan, Produktansicht, Verlauf und Chat
-- Convex-Backend fuer Auth, Datenmodell, Alerts, Notifications und Chats
+- Web-App für Supplier-Workflows und die veröffentlichte Demo
+- Mobile App für Scan, Produktansicht, Verlauf und Chat
+- Convex-Backend für Auth, Datenmodell, Alerts, Notifications und Chats
 
-Der aktuelle Produktstand ist ein lauffaehiger Demo- und MVP-Stand mit echter
-Web-App, echter Mobile-App und echtem Backend. Fuer Tests und Demos sind die
+Der aktuelle Produktstand ist ein lauffähiger Demo- und MVP-Stand mit echter
+Web-App, echter Mobile-App und echtem Backend. Für Tests und Demos sind die
 Barcode-Ergebnisse jedoch absichtlich gemockt und liefern nur Testresultate.
 
 ## Live-Demo
@@ -26,17 +26,17 @@ Hinweis: Die veröffentlichte Seite startet aktuell mit einem Sign-in-Screen.
 ## Wichtiger Demo-Hinweis
 
 > Alle Barcode-Ergebnisse in der Demo sind gemockt.
-> Es werden nur Testresultate angezeigt. Die Demo ist fuer die Darstellung des
-> Produktflusses gedacht und nicht fuer echte Produktverifikation.
+> Es werden nur Testresultate angezeigt. Die Demo ist für die Darstellung des
+> Produktflusses gedacht und nicht für echte Produktverifikation.
 
 ## Produktvideo
 
 <video src="media/kumu-web-search.mp4" controls width="100%">
-  Ihr Browser unterstuetzt das Video-Tag nicht.
+  Ihr Browser unterstützt das Video-Tag nicht.
   <a href="media/kumu-web-search.mp4">Video herunterladen (MP4)</a>
 </video>
 
-[Video direkt oeffnen (MP4)](media/kumu-web-search.mp4)
+[Video direkt öffnen (MP4)](media/kumu-web-search.mp4)
 
 ## Screenshots Web
 
@@ -58,11 +58,11 @@ Hinweis: Die veröffentlichte Seite startet aktuell mit einem Sign-in-Screen.
 
 ## Dokumentation
 
-| Datei                                                               | Inhalt                                                         |
-| ------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Produktueberblick](docs/produktueberblick.md)                      | Problem, Zielgruppen, Nutzen und aktueller Produktumfang       |
-| [Anwenderguide](docs/anwenderguide.md)                              | OTP-Login, Scan-Flow, Produktansicht, Verlauf, Chat und Profil |
-| [Lieferantenguide](docs/lieferantenguide.md)                        | Firmenprofil, Produktpflege, Supply-Chain-Daten und Alerts     |
-| [Technik und Betrieb](docs/technik-und-betrieb.md)                  | Monorepo, Frontends, Backend, CI und Deployment                |
-| [Testing und Demo](docs/testing-und-demo.md)                        | Testansatz, Live-Demo und Demo-Grenzen                         |
-| [Mockups](https://www.figma.com/design/cMDLce6WDp4Me1Ia4mWEhd/Kumu) | Figma-Mockups                                                  |
+| Datei                                                                 | Inhalt                                                         |
+| --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [Produktüberblick](docs/produktueberblick.md)                         | Problem, Zielgruppen, Nutzen und aktueller Produktumfang       |
+| [Anwenderguide](docs/anwenderguide.md)                                | OTP-Login, Scan-Flow, Produktansicht, Verlauf, Chat und Profil |
+| [Lieferantenguide](docs/lieferantenguide.md)                          | Firmenprofil, Produktpflege, Supply-Chain-Daten und Alerts     |
+| [Technik und Betrieb](docs/technik-und-betrieb.md)                    | Monorepo, Frontends, Backend, CI und Deployment                |
+| [Testing und Demo](docs/testing-und-demo.md)                          | Testansatz, Live-Demo und Demo-Grenzen                         |
+| [Mockups](https://www.figma.com/design/cMDLce6WDp4Me1Ia4mWEhd/Kumu)  | Figma-Mockups                                                  |

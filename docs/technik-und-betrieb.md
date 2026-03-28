@@ -43,9 +43,9 @@ kumu/
   - Notifications
   - Chats
 
-## Aktuelle CI-Realitaet
+## Aktuelle CI-Realität
 
-Die GitHub-CI prueft aktuell parallel:
+Die GitHub-CI prüft aktuell parallel:
 
 - `bun run format:check`
 - `bun run lint`
@@ -63,10 +63,10 @@ werden.
 | Backend    | Convex-Deployment vorhanden             |
 | Mobile App | lokaler und Expo-basierter Demo-Betrieb |
 
-## Technische Staerken
+## Technische Stärken
 
-- ein gemeinsames Datenmodell fuer Web und Mobile
-- TypeScript ueber alle Hauptteile hinweg
+- ein gemeinsames Datenmodell für Web und Mobile
+- TypeScript über alle Hauptteile hinweg
 - echter Backend-Kern statt reinem Mock-Frontend
 - Alerts, Notifications und Chat als echte Produktlogik
 
