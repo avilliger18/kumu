@@ -10,6 +10,7 @@
 
 import type * as OTP from "../OTP.js";
 import type * as auth from "../auth.js";
+import type * as chats from "../chats.js";
 import type * as http from "../http.js";
 import type * as notifications from "../notifications.js";
 import type * as products from "../products.js";
@@ -25,6 +26,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   OTP: typeof OTP;
   auth: typeof auth;
+  chats: typeof chats;
   http: typeof http;
   notifications: typeof notifications;
   products: typeof products;

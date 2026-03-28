@@ -374,4 +374,19 @@ export default defineSchema({
     .index("by_batch_and_time", ["batchId", "occurredAt"])
     .index("by_product_and_time", ["productId", "occurredAt"])
     .index("by_eventType", ["eventType"]),
+
+  chatSessions: defineTable({
+    userTokenIdentifier: v.string(),
+    title: v.string(),
+    productBarcode: v.optional(v.string()),
+    updatedAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_user_updatedAt", ["userTokenIdentifier", "updatedAt"]),
+
+  chatMessages: defineTable({
+    sessionId: v.id("chatSessions"),
+    role: v.union(v.literal("user"), v.literal("ai")),
+    text: v.string(),
+    createdAt: v.number(),
+  }).index("by_session", ["sessionId"]),
 });

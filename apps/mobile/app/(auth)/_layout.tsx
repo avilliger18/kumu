@@ -1,25 +1,18 @@
-import { Stack } from "expo-router";
-import { ios26Colors, ios26StackScreenOptions } from "@/constants/ios26";
+import { Redirect, Stack } from "expo-router";
+
+import { useAuth } from "@/providers/auth-context";
 
 export default function AuthLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (!isLoading && isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
+
   return (
-    <Stack
-      screenOptions={{
-        ...ios26StackScreenOptions,
-        headerShown: false,
-        animation: "slide_from_right",
-      }}
-    >
-      <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="verify"
-        options={{
-          headerShown: true,
-          title: "Enter Code",
-          headerBackButtonDisplayMode: "minimal",
-          headerStyle: { backgroundColor: ios26Colors.background },
-        }}
-      />
+    <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+      <Stack.Screen name="email" />
+      <Stack.Screen name="verify" />
     </Stack>
   );
 }
