@@ -21,7 +21,7 @@ Kumu verbindet diese beiden Seiten:
 | Bereich    | Aktueller Stand                                               |
 | ---------- | ------------------------------------------------------------- |
 | Web-App    | Supplier-Portal mit Company-, Products- und Alerts-Bereich    |
-| Mobile App | OTP-Login, Scan, Verlauf, Produktdetail, Chats, Profil        |
+| Mobile App | OTP-Login, Scan, Verlauf, Produktdetail, KI Chats, Profil     |
 | Backend    | Convex mit Auth, Products, Suppliers, Notifications und Chats |
 | Live-Demo  | [kumu-web.vercel.app](https://kumu-web.vercel.app/)           |
 

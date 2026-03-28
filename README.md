@@ -40,6 +40,9 @@ Hinweis: Die veröffentlichte Seite startet aktuell mit einem Sign-in-Screen.
 
 ## Screenshots Web
 
+**Lieferantenkette**
+![Web Lieferantenkette](media/web/web-lieferkette.gif)
+
 **Produktliste**
 ![Web Produktliste](media/web/web-products.png)
 
