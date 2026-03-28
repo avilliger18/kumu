@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { supplyChainStep } from "./schema";
 
 function slugify(name: string) {
@@ -292,7 +293,7 @@ export const createProductAlert = mutation({
       throw new Error("Not your product");
 
     const now = Date.now();
-    return await ctx.db.insert("productAlerts", {
+    const alertId = await ctx.db.insert("productAlerts", {
       productId: args.productId,
       producerId: producer._id,
       stepIndex: args.stepIndex,
@@ -304,6 +305,17 @@ export const createProductAlert = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    // Fan out email notifications to users who scanned this product + batch
+    await ctx.scheduler.runAfter(0, internal.notifications.fanOutAlertEmails, {
+      alertId,
+      productId: args.productId,
+      faultDescription: args.faultDescription.trim(),
+      severity: args.severity,
+      chargeNumber: args.chargeNumber?.trim(),
+    });
+
+    return alertId;
   },
 });
 

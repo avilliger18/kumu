@@ -332,6 +332,20 @@ export default defineSchema({
     .index("by_product", ["productId"])
     .index("by_producer", ["producerId"]),
 
+  userNotifications: defineTable({
+    userTokenIdentifier: v.string(),
+    alertId: v.id("productAlerts"),
+    productId: v.id("products"),
+    productTitle: v.optional(v.string()),
+    faultDescription: v.string(),
+    severity: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    chargeNumber: v.optional(v.string()),
+    emailSent: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userTokenIdentifier"])
+    .index("by_alert", ["alertId"]),
+
   trackingEvents: defineTable({
     productId: v.id("products"),
     batchId: v.optional(v.id("productBatches")),
