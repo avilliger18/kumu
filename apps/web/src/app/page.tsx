@@ -9,6 +9,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import type { GenericId } from "convex/values";
 import { api } from "@kumu/backend/convex/_generated/api";
 import { DropdownMenu } from "radix-ui";
+import { User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -34,7 +35,7 @@ const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
 
 // kg CO₂ per ton-km (same factors as supplier page)
 const CO2_FACTOR: Record<string, number> = {
-  ship: 0.010,
+  ship: 0.01,
   plane: 0.602,
   truck: 0.062,
   train: 0.022,
@@ -52,13 +53,21 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function calcFootprint(steps: { lat: number; lng: number; transportMode?: string }[]) {
+function calcFootprint(
+  steps: { lat: number; lng: number; transportMode?: string }[],
+) {
   let totalKm = 0;
   let co2 = 0;
   for (let i = 0; i < steps.length - 1; i++) {
-    const km = haversineKm(steps[i].lat, steps[i].lng, steps[i + 1].lat, steps[i + 1].lng);
+    const km = haversineKm(
+      steps[i].lat,
+      steps[i].lng,
+      steps[i + 1].lat,
+      steps[i + 1].lng,
+    );
     totalKm += km;
-    co2 += km * (CO2_FACTOR[steps[i].transportMode ?? "truck"] ?? CO2_FACTOR.truck);
+    co2 +=
+      km * (CO2_FACTOR[steps[i].transportMode ?? "truck"] ?? CO2_FACTOR.truck);
   }
   return {
     totalKm: Math.round(totalKm),
@@ -190,14 +199,14 @@ export default function SupplyChainGlobe() {
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-slate-100 text-slate-900">
       {!isAuthLoading && isAuthenticated && (
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-8 right-8 z-50">
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF459F] text-sm font-bold text-white shadow-md ring-2 ring-white/20 transition hover:bg-[#FF459F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF459F]"
                 aria-label="Account menu"
               >
-                {initials}
+                {initials === "?" ? <User className="h-5 w-5" /> : initials}
               </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
@@ -216,12 +225,12 @@ export default function SupplyChainGlobe() {
                   onSelect={() => router.push("/supplier")}
                   className="flex cursor-pointer select-none items-center px-4 py-2.5 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:bg-slate-50"
                 >
-                  Become a Supplier
+                  Supplier
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="my-1 h-px bg-slate-100" />
                 <DropdownMenu.Item
                   onSelect={() => signOut()}
-                  className="flex cursor-pointer select-none items-center px-4 py-2.5 text-sm font-medium text-red-500 outline-none hover:bg-red-50 focus:bg-red-50"
+                  className="flex cursor-pointer select-none items-center px-4 py-2.5 text-sm font-medium text-[#FF459F] outline-none hover:bg-[#FF459F]/10 focus:bg-[#FF459F]/10"
                 >
                   Log out
                 </DropdownMenu.Item>
@@ -268,24 +277,42 @@ export default function SupplyChainGlobe() {
                             alert.severity === "high"
                               ? "border-red-200 bg-red-50"
                               : alert.severity === "medium"
-                              ? "border-orange-200 bg-orange-50"
-                              : "border-yellow-200 bg-yellow-50"
+                                ? "border-orange-200 bg-orange-50"
+                                : "border-yellow-200 bg-yellow-50"
                           }`}
                         >
                           <div className="flex items-start gap-2">
                             <span className="mt-0.5 text-lg">⚠️</span>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-xs font-bold uppercase tracking-wide ${
-                                alert.severity === "high" ? "text-red-700"
-                                : alert.severity === "medium" ? "text-orange-700"
-                                : "text-yellow-700"
-                              }`}>
-                                {alert.severity === "high" ? "High" : alert.severity === "medium" ? "Medium" : "Low"} severity alert
+                              <p
+                                className={`text-xs font-bold uppercase tracking-wide ${
+                                  alert.severity === "high"
+                                    ? "text-red-700"
+                                    : alert.severity === "medium"
+                                      ? "text-orange-700"
+                                      : "text-yellow-700"
+                                }`}
+                              >
+                                {alert.severity === "high"
+                                  ? "High"
+                                  : alert.severity === "medium"
+                                    ? "Medium"
+                                    : "Low"}{" "}
+                                severity alert
                                 {alert.stepLabel && ` · ${alert.stepLabel}`}
                               </p>
-                              <p className="mt-1 text-sm text-slate-700">{alert.faultDescription}</p>
+                              <p className="mt-1 text-sm text-slate-700">
+                                {alert.faultDescription}
+                              </p>
                               <p className="mt-1 text-xs text-slate-500">
-                                {alert.chargeNumber && <>Affected charge: <span className="font-semibold">{alert.chargeNumber}</span></>}
+                                {alert.chargeNumber && (
+                                  <>
+                                    Affected charge:{" "}
+                                    <span className="font-semibold">
+                                      {alert.chargeNumber}
+                                    </span>
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -323,96 +350,199 @@ export default function SupplyChainGlobe() {
                             ref={scoreButtonRef}
                             className="inline-flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-[#FF459F] text-[#FF459F] text-xs"
                             onMouseEnter={() => {
-                              const rect = scoreButtonRef.current?.getBoundingClientRect();
-                              if (rect) setScorePopoverPos({ top: rect.bottom + 8, left: rect.left });
+                              const rect =
+                                scoreButtonRef.current?.getBoundingClientRect();
+                              if (rect)
+                                setScorePopoverPos({
+                                  top: rect.bottom + 8,
+                                  left: rect.left,
+                                });
                               setScorePopoverOpen(true);
                             }}
                             onMouseLeave={() => setScorePopoverOpen(false)}
                           >
                             ?
                           </span>
-                          {scorePopoverOpen && typeof document !== "undefined" && createPortal(
-                            <div
-                              className="fixed z-9999 w-80 rounded-2xl bg-white shadow-xl border border-slate-100 p-5"
-                              style={{ top: scorePopoverPos.top, left: scorePopoverPos.left }}
-                              onMouseEnter={() => setScorePopoverOpen(true)}
-                              onMouseLeave={() => setScorePopoverOpen(false)}
-                            >
-                              <p className="font-bold text-[#FF459F] text-base mb-3">Kumu Score</p>
-                              <div className="flex flex-col gap-2">
-                                {[
-                                  { label: "Excellent", color: "#FF459F", range: "80–100" },
-                                  { label: "Good",      color: "#FF7DBF", range: "60–79" },
-                                  { label: "Average",   color: "#FFB5D9", range: "40–59" },
-                                  { label: "Poor",      color: "#FFCCEB", range: "20–39" },
-                                  { label: "Very Poor", color: "#FFE5F4", range: "0–19" },
-                                ].map(({ label, color, range }) => (
-                                  <div key={label} className="flex items-center gap-2">
-                                    <span className="h-4 w-4 rounded-full shrink-0" style={{ background: color }} />
-                                    <span className="text-sm text-slate-600">{label}</span>
-                                    <span className="ml-auto text-xs text-slate-400">{range}</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <hr className="my-3 border-[#FF459F]/20" />
-                              {(() => {
-                                const qs = product.qualityScores;
-                                const n = nutrition;
-                                const categories = [
-                                  {
-                                    label: "Macronutrients",
-                                    pct: qs.nutriScore ? ({ A: 100, B: 80, C: 60, D: 40, E: 20 }[qs.nutriScore] ?? null) : null,
-                                  },
-                                  {
-                                    label: "Micronutrients",
-                                    pct: qs.overallFoodScore != null ? Math.round(qs.overallFoodScore * 1.1) : null,
-                                  },
-                                  {
-                                    label: "Degree of processing",
-                                    pct: qs.novaGroup != null ? Math.round(((5 - qs.novaGroup) / 4) * 100) : null,
-                                  },
-                                  {
-                                    label: "Additives",
-                                    pct: qs.additiveRiskScore != null ? Math.max(0, Math.round(100 - qs.additiveRiskScore * 10)) : null,
-                                  },
-                                  {
-                                    label: "Fat quality",
-                                    pct: n?.fat && n?.saturatedFat != null ? Math.max(0, Math.round((1 - n.saturatedFat / n.fat) * 100)) : null,
-                                  },
-                                  {
-                                    label: "Carbohydrate quality",
-                                    pct: n?.carbs && n?.sugars != null ? Math.max(0, Math.round((1 - n.sugars / n.carbs) * 100)) : null,
-                                  },
-                                  {
-                                    label: "Ingredient quality",
-                                    pct: qs.overallFoodScore ?? null,
-                                  },
-                                ];
-                                return categories.map(({ label, pct }) => (
-                                  <div key={label} className="flex items-center gap-2">
-                                    <span className="w-36 shrink-0 text-xs text-slate-700">{label}</span>
-                                    <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: "#ffd6ea" }}>
-                                      {pct != null && (
-                                        <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, background: "#FF459F" }} />
-                                      )}
+                          {scorePopoverOpen &&
+                            typeof document !== "undefined" &&
+                            createPortal(
+                              <div
+                                className="fixed z-9999 w-80 rounded-2xl bg-white shadow-xl border border-slate-100 p-5"
+                                style={{
+                                  top: scorePopoverPos.top,
+                                  left: scorePopoverPos.left,
+                                }}
+                                onMouseEnter={() => setScorePopoverOpen(true)}
+                                onMouseLeave={() => setScorePopoverOpen(false)}
+                              >
+                                <p className="font-bold text-[#FF459F] text-base mb-3">
+                                  Kumu Score
+                                </p>
+                                <div className="flex flex-col gap-2">
+                                  {[
+                                    {
+                                      label: "Excellent",
+                                      color: "#FF459F",
+                                      range: "80–100",
+                                    },
+                                    {
+                                      label: "Good",
+                                      color: "#FF7DBF",
+                                      range: "60–79",
+                                    },
+                                    {
+                                      label: "Average",
+                                      color: "#FFB5D9",
+                                      range: "40–59",
+                                    },
+                                    {
+                                      label: "Poor",
+                                      color: "#FFCCEB",
+                                      range: "20–39",
+                                    },
+                                    {
+                                      label: "Very Poor",
+                                      color: "#FFE5F4",
+                                      range: "0–19",
+                                    },
+                                  ].map(({ label, color, range }) => (
+                                    <div
+                                      key={label}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <span
+                                        className="h-4 w-4 rounded-full shrink-0"
+                                        style={{ background: color }}
+                                      />
+                                      <span className="text-sm text-slate-600">
+                                        {label}
+                                      </span>
+                                      <span className="ml-auto text-xs text-slate-400">
+                                        {range}
+                                      </span>
                                     </div>
-                                  </div>
-                                ));
-                              })()}
-                            </div>,
-                            document.body
-                          )}
+                                  ))}
+                                </div>
+                                <hr className="my-3 border-[#FF459F]/20" />
+                                {(() => {
+                                  const qs = product.qualityScores;
+                                  const n = nutrition;
+                                  const categories = [
+                                    {
+                                      label: "Macronutrients",
+                                      pct: qs.nutriScore
+                                        ? ({
+                                            A: 100,
+                                            B: 80,
+                                            C: 60,
+                                            D: 40,
+                                            E: 20,
+                                          }[qs.nutriScore] ?? null)
+                                        : null,
+                                    },
+                                    {
+                                      label: "Micronutrients",
+                                      pct:
+                                        qs.overallFoodScore != null
+                                          ? Math.round(
+                                              qs.overallFoodScore * 1.1,
+                                            )
+                                          : null,
+                                    },
+                                    {
+                                      label: "Degree of processing",
+                                      pct:
+                                        qs.novaGroup != null
+                                          ? Math.round(
+                                              ((5 - qs.novaGroup) / 4) * 100,
+                                            )
+                                          : null,
+                                    },
+                                    {
+                                      label: "Additives",
+                                      pct:
+                                        qs.additiveRiskScore != null
+                                          ? Math.max(
+                                              0,
+                                              Math.round(
+                                                100 - qs.additiveRiskScore * 10,
+                                              ),
+                                            )
+                                          : null,
+                                    },
+                                    {
+                                      label: "Fat quality",
+                                      pct:
+                                        n?.fat && n?.saturatedFat != null
+                                          ? Math.max(
+                                              0,
+                                              Math.round(
+                                                (1 - n.saturatedFat / n.fat) *
+                                                  100,
+                                              ),
+                                            )
+                                          : null,
+                                    },
+                                    {
+                                      label: "Carbohydrate quality",
+                                      pct:
+                                        n?.carbs && n?.sugars != null
+                                          ? Math.max(
+                                              0,
+                                              Math.round(
+                                                (1 - n.sugars / n.carbs) * 100,
+                                              ),
+                                            )
+                                          : null,
+                                    },
+                                    {
+                                      label: "Ingredient quality",
+                                      pct: qs.overallFoodScore ?? null,
+                                    },
+                                  ];
+                                  return categories.map(({ label, pct }) => (
+                                    <div
+                                      key={label}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <span className="w-36 shrink-0 text-xs text-slate-700">
+                                        {label}
+                                      </span>
+                                      <div
+                                        className="flex-1 h-3 rounded-full overflow-hidden"
+                                        style={{ background: "#ffd6ea" }}
+                                      >
+                                        {pct != null && (
+                                          <div
+                                            className="h-full rounded-full"
+                                            style={{
+                                              width: `${Math.min(pct, 100)}%`,
+                                              background: "#FF459F",
+                                            }}
+                                          />
+                                        )}
+                                      </div>
+                                    </div>
+                                  ));
+                                })()}
+                              </div>,
+                              document.body,
+                            )}
                         </div>
-                        <div className="mt-3 relative h-10 w-full rounded-full overflow-visible"
-                          style={{ background: "linear-gradient(to right, #ffd6ea, #FF459F)" }}
+                        <div
+                          className="mt-3 relative h-10 w-full rounded-full overflow-visible"
+                          style={{
+                            background:
+                              "linear-gradient(to right, #ffd6ea, #FF459F)",
+                          }}
                         >
                           <div
                             className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-8 w-8 rounded-full bg-white shadow-md border-2 border-white"
-                            style={{ left: `${product.qualityScores.overallFoodScore}%` }}
+                            style={{
+                              left: `${product.qualityScores.overallFoodScore}%`,
+                            }}
                           />
-                          <span
-                            className="absolute top-1/2 -translate-y-1/2 right-4 text-white text-sm font-semibold"
-                          >
+                          <span className="absolute top-1/2 -translate-y-1/2 right-4 text-white text-sm font-semibold">
                             {product.qualityScores.overallFoodScore}/100
                           </span>
                         </div>
@@ -458,14 +588,16 @@ export default function SupplyChainGlobe() {
                       <h4 className="font-heading text-2xl">Ingredients</h4>
                       <ul className="list-disc pl-5 pr-32">
                         {(product.ingredients ?? []).length > 0 ? (
-                          (product.ingredients ?? []).map((ingredient, index) => (
-                            <li key={`${ingredient.name}-${index}`}>
-                              {ingredient.name}
-                              {typeof ingredient.percent === "number"
-                                ? ` (${ingredient.percent}%)`
-                                : ""}
-                            </li>
-                          ))
+                          (product.ingredients ?? []).map(
+                            (ingredient, index) => (
+                              <li key={`${ingredient.name}-${index}`}>
+                                {ingredient.name}
+                                {typeof ingredient.percent === "number"
+                                  ? ` (${ingredient.percent}%)`
+                                  : ""}
+                              </li>
+                            ),
+                          )
                         ) : (
                           <li>Keine Zutaten verfuegbar</li>
                         )}
@@ -569,7 +701,9 @@ export default function SupplyChainGlobe() {
                       </h4>
                       <p className="mt-4 text-sm">Distance traveled</p>
                       <p className="mt-1 text-4xl font-heading leading-none">
-                        {footprint.totalKm > 0 ? `${footprint.totalKm.toLocaleString()} km` : "—"}
+                        {footprint.totalKm > 0
+                          ? `${footprint.totalKm.toLocaleString()} km`
+                          : "—"}
                       </p>
                       {footprint.co2PerTon > 0 && (
                         <>

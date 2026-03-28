@@ -113,17 +113,6 @@ export default function ProfilePage() {
             Log Out
           </button>
         </div>
-
-        {/* mascot */}
-        <div className="pointer-events-none absolute right-4 bottom-8 opacity-90">
-          <Image
-            src={circleBubble}
-            alt=""
-            width={72}
-            height={72}
-            className="drop-shadow-md"
-          />
-        </div>
       </div>
     </main>
   );
