@@ -2,7 +2,7 @@ import { Email } from "@convex-dev/auth/providers/Email";
 
 export const ConsoleOTP = Email({
   id: "console-otp",
-  maxAge: 60 * 15, // 15 minutes
+  maxAge: 60 * 15,              
   async generateVerificationToken() {
     return Math.floor(100000 + Math.random() * 900000).toString();
   },

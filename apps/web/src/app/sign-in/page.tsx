@@ -59,7 +59,7 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Background Circles (placeholders for images) */}
+      
       <Image
         src={circle}
         alt="bubble"
@@ -71,9 +71,9 @@ export default function SignInPage() {
         alt="bubble"
         className="absolute -bottom-32 -left-32 w-[420px] h-[420px] object-contain opacity-70 pointer-events-none select-none"
       />
-      {/* Card */}
+      
       <div className="w-full max-w-sm relative z-10">
-        {/* Headline */}
+        
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold font-heading text-primary leading-snug">
             Track your food.
@@ -84,7 +84,7 @@ export default function SignInPage() {
 
         <p className="text-sm text-primary mb-4 font-medium">Sign into Kumu</p>
 
-        {/* Email Input */}
+        
         <div className="mb-4">
           <Input
             type="email"
@@ -97,7 +97,7 @@ export default function SignInPage() {
           />
         </div>
 
-        {/* OTP Input (only after step 1) */}
+        
         {step === "code" && (
           <div className="mb-4">
             <Input
@@ -112,10 +112,10 @@ export default function SignInPage() {
           </div>
         )}
 
-        {/* Error */}
+        
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-        {/* Button */}
+        
         <Button
           onClick={step === "email" ? handleSendOTP : handleVerifyOTP}
           disabled={loading}

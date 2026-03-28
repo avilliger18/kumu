@@ -31,25 +31,25 @@ export default function ScanScreen() {
         params: { barcode: data, source: "scan" },
       });
     } catch {
-      // navigation failed — allow retry
+                                        
       scanning.current = false;
       return;
     }
 
-    // Reset after 2 s so the scanner works again when the modal is dismissed.
-    // NativeTabs doesn't blur on modal presentation, so useFocusEffect
-    // cleanup never fires while the product route sits on top.
+                                                                              
+                                                                       
+                                                               
     setTimeout(() => {
       scanning.current = false;
     }, 2000);
   };
 
-  // ── Permissions not yet determined ───────────────────────────────────────
+                                                                              
   if (!permission) {
     return <View style={styles.root} />;
   }
 
-  // ── Permission denied ─────────────────────────────────────────────────────
+                                                                               
   if (!permission.granted) {
     return (
       <SafeAreaView style={[styles.root, styles.center]} edges={["top"]}>
@@ -80,7 +80,7 @@ export default function ScanScreen() {
     );
   }
 
-  // ── Camera active ─────────────────────────────────────────────────────────
+                                                                               
   return (
     <View style={styles.root}>
       {cameraActive && (
@@ -94,12 +94,12 @@ export default function ScanScreen() {
         />
       )}
 
-      {/* Dark vignette overlay */}
+      
       <View pointerEvents="none" style={styles.overlay} />
 
-      {/* Finder + labels */}
+      
       <View pointerEvents="none" style={styles.ui}>
-        {/* Top label */}
+        
         <SafeAreaView edges={["top"]}>
           <View style={styles.topArea}>
             <Text style={styles.screenTitle}>Scan</Text>
@@ -107,7 +107,7 @@ export default function ScanScreen() {
           </View>
         </SafeAreaView>
 
-        {/* Finder */}
+        
         <View style={styles.finderWrap}>
           <View style={styles.finder}>
             <View style={[styles.corner, styles.cTL]} />
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-  // ── Permission UI ──────────────────────────────────────────────────────────
+                                                                                
   permissionCard: {
     width: "100%",
     maxWidth: 360,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // ── Camera overlay ─────────────────────────────────────────────────────────
+                                                                                
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.38)",
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // ── Finder ─────────────────────────────────────────────────────────────────
+                                                                                
   finderWrap: {
     alignItems: "center",
     justifyContent: "center",

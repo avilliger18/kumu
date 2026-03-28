@@ -30,7 +30,7 @@ export default function ProductsPage() {
   );
   const [showForm, setShowForm] = useState(false);
 
-  // Not yet a supplier — prompt to set up company first
+                                                        
   if (producer === null) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-16 text-center">
@@ -56,7 +56,7 @@ export default function ProductsPage() {
     return <div className="p-8 text-sm text-slate-400">Loading…</div>;
   }
 
-  // Show create/edit form
+                          
   if (showForm || editingProduct) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-8">

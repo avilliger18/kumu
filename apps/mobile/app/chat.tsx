@@ -70,7 +70,7 @@ export default function ChatScreen() {
 
     await addMessage({ sessionId, role: "user", text: trimmed });
 
-    // Placeholder AI reply
+                           
     setTimeout(async () => {
       await addMessage({
         sessionId,

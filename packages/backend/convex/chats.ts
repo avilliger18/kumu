@@ -1,15 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+                                                                                  
 async function requireUser(ctx: any) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Not authenticated");
   return identity.tokenIdentifier as string;
 }
 
-// ── createSession ──────────────────────────────────────────────────────────────
-// Creates a new chat session and inserts the AI greeting message.
+                                                                                  
+                                                                  
 export const createSession = mutation({
   args: {
     title: v.string(),

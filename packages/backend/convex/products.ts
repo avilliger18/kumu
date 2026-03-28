@@ -15,7 +15,7 @@ export const resolveProductByScan = query({
     batchCode: v.optional(v.string()),
   },
   handler: async (ctx, { barcode }) => {
-    // Check real DB first
+                          
     const barcodeNorm = normalizeBarcode(barcode);
     const codeEntry = await ctx.db
       .query("productCodes")
@@ -55,7 +55,7 @@ export const resolveProductByScan = query({
       }
     }
 
-    // Fall back to Nutella mock
+                                
 
     return {
       resolutionStatus: "found" as const,

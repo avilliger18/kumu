@@ -6,7 +6,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 
-// Internal query: find all users who scanned this product (+ batch code if provided)
+                                                                                     
 export const getAffectedUsers = internalQuery({
   args: {
     productId: v.id("products"),
@@ -40,7 +40,7 @@ export const getAffectedUsers = internalQuery({
   },
 });
 
-// Internal query: get email for a user token identifier from their profile
+                                                                           
 export const getUserEmail = internalQuery({
   args: { userTokenIdentifier: v.string() },
   handler: async (ctx, args) => {
@@ -54,7 +54,7 @@ export const getUserEmail = internalQuery({
   },
 });
 
-// Internal mutation: record that a notification was created for a user
+                                                                       
 export const insertNotification = internalMutation({
   args: {
     userTokenIdentifier: v.string(),
@@ -81,7 +81,7 @@ export const insertNotification = internalMutation({
   },
 });
 
-// Internal action: fan out email notifications for an alert
+                                                            
 export const fanOutAlertEmails = internalAction({
   args: {
     alertId: v.id("productAlerts"),
@@ -93,7 +93,7 @@ export const fanOutAlertEmails = internalAction({
   handler: async (ctx, args) => {
     const resendApiKey = process.env.RESEND_API_KEY;
 
-    // Find all affected users
+                              
     const affectedUsers = await ctx.runQuery(
       internal.notifications.getAffectedUsers,
       { productId: args.productId, chargeNumber: args.chargeNumber },

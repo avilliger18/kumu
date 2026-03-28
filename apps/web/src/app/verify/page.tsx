@@ -25,7 +25,7 @@ function VerifyForm() {
     setLoading(true);
     try {
       await signIn("console-otp", { email, code });
-      // AuthGuard in layout handles redirect to /
+                                                  
     } catch (e: any) {
       setError(e?.message ?? "Invalid code. Please try again.");
       setCode("");
@@ -53,7 +53,7 @@ function VerifyForm() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Back */}
+        
         <button
           onClick={() => router.back()}
           className="mb-10 text-blue-400 text-base hover:text-blue-300 transition-colors"
@@ -61,7 +61,7 @@ function VerifyForm() {
           ← Back
         </button>
 
-        {/* Header */}
+        
         <div className="mb-10">
           <h1 className="text-white text-4xl font-bold tracking-tight mb-3">Enter Code</h1>
           <p className="text-zinc-400 text-base leading-relaxed">
@@ -71,7 +71,7 @@ function VerifyForm() {
           <p className="text-zinc-500 text-sm mt-2">Check the Convex dev server console.</p>
         </div>
 
-        {/* OTP Input */}
+        
         <div className="bg-zinc-900 rounded-2xl px-4 pt-3 pb-3 mb-3 border border-zinc-800">
           <label className="block text-zinc-500 text-xs mb-1 uppercase tracking-widest font-medium">
             Verification Code
@@ -104,7 +104,7 @@ function VerifyForm() {
           <div className="mb-4" />
         )}
 
-        {/* Verify */}
+        
         <button
           onClick={handleVerify}
           disabled={loading || code.length < 6}
@@ -117,7 +117,7 @@ function VerifyForm() {
           )}
         </button>
 
-        {/* Resend */}
+        
         <button
           onClick={handleResend}
           disabled={resending}

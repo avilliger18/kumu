@@ -127,7 +127,7 @@ function AlertsContent() {
         </p>
       </div>
 
-      {/* product selector */}
+      
       <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h4 className="text-lg font-semibold font-heading mb-2">
           Select product
@@ -151,7 +151,7 @@ function AlertsContent() {
 
       {selectedProductId && (
         <>
-          {/* existing alerts */}
+          
           <div className="mb-4 flex flex-col gap-3">
             {alerts === undefined && (
               <p className="text-sm text-slate-400">Loading alerts…</p>
@@ -219,7 +219,7 @@ function AlertsContent() {
             })}
           </div>
 
-          {/* create form */}
+          
           {showForm ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <h4 className="text-lg font-semibold font-heading mb-2">

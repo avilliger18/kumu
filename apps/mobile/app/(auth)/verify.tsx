@@ -86,7 +86,7 @@ export default function VerifyScreen() {
           </View>
 
           <View style={styles.form}>
-            {/* Hidden real input */}
+            
             <TextInput
               ref={inputRef}
               value={code}
@@ -100,7 +100,7 @@ export default function VerifyScreen() {
               textContentType="oneTimeCode"
             />
 
-            {/* Visual boxes */}
+            
             <Pressable
               style={styles.codeRow}
               onPress={() => inputRef.current?.focus()}>

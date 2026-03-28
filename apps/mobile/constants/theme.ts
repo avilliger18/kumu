@@ -1,40 +1,40 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+   
+                                                                                                    
+                                                                                                                                                                                                   
+   
 
 import { Platform } from 'react-native';
 
-// Light mode palette matched to web app (apps/web/src/app/globals.css)
+                                                                       
 export const Colors = {
   light: {
-    // Core
-    background: '#F5F6FA',       // oklch(0.9785 0.0045 258.3245) — soft blueish white
-    foreground: '#152E4F',       // oklch(0.3421 0.069 251.7764)  — dark navy
-    card: '#FFFFFF',             // oklch(1 0 0)
+           
+    background: '#F5F6FA',                                                            
+    foreground: '#152E4F',                                                   
+    card: '#FFFFFF',                            
     cardForeground: '#152E4F',
 
-    // Interactive
-    primary: '#152E4F',          // oklch(0.3421 0.069 251.7764)
-    primaryForeground: '#FAFAFA',// oklch(0.985 0 0)
-    secondary: '#CCDDEF',        // oklch(0.8999 0.029 249.7768)  — light blue
+                  
+    primary: '#152E4F',                                         
+    primaryForeground: '#FAFAFA',                   
+    secondary: '#CCDDEF',                                                     
     secondaryForeground: '#152E4F',
 
-    // Muted / accent
-    muted: '#F3F3F3',            // oklch(0.97 0 0)
-    mutedForeground: '#6A6A6A',  // oklch(0.556 0 0)
-    accent: '#F3F3F3',           // oklch(0.97 0 0)
-    accentForeground: '#0F0F0F', // oklch(0.205 0 0)
+                     
+    muted: '#F3F3F3',                              
+    mutedForeground: '#6A6A6A',                     
+    accent: '#F3F3F3',                             
+    accentForeground: '#0F0F0F',                    
 
-    // Status
-    destructive: '#E6000F',      // oklch(0.577 0.245 27.325)     — vivid red
+             
+    destructive: '#E6000F',                                                  
 
-    // Borders & inputs
-    border: '#E3E3E3',           // oklch(0.922 0 0)
-    input: '#E3E3E3',            // oklch(0.922 0 0)
-    ring: '#9A9A9A',             // oklch(0.708 0 0)
+                       
+    border: '#E3E3E3',                              
+    input: '#E3E3E3',                               
+    ring: '#9A9A9A',                                
 
-    // Navigation / legacy aliases
+                                  
     text: '#152E4F',
     tint: '#152E4F',
     icon: '#6A6A6A',
@@ -68,13 +68,13 @@ export const Colors = {
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
+                                                    
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
+                                                  
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
+                                                    
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
+                                                       
     mono: 'ui-monospace',
   },
   default: {
