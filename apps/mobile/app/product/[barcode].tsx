@@ -21,26 +21,10 @@ import {
 } from "@/constants/ios26-navigation";
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const herbImage = require("@/assets/images/herb.png") as number;
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const appleImage = require("@/assets/images/apple.png") as number;
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const footstepImage = require("@/assets/images/footstep.png") as number;
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const globeImage = require("@/assets/images/globe.png") as number;
-
-const NUTRI: Record<string, { bg: string; fg: string }> = {
-  A: { bg: "#1A9E5A", fg: "#fff" },
-  B: { bg: "#7AC547", fg: "#fff" },
-  C: { bg: "#E6AE00", fg: "#000" },
-  D: { bg: "#EF7D1A", fg: "#fff" },
-  E: { bg: "#E03520", fg: "#fff" },
-};
-
-function SectionHeader({ title }: { title: string }) {
-  return <Text style={s.sectionHeader}>{title}</Text>;
-}
 
 function Card({
   children,
@@ -50,35 +34,6 @@ function Card({
   style?: object;
 }) {
   return <View style={[s.card, style]}>{children}</View>;
-}
-
-function NutrientRow({
-  label,
-  value,
-  unit = "g",
-  sub = false,
-  bold = false,
-  last = false,
-}: {
-  label: string;
-  value?: number;
-  unit?: string;
-  sub?: boolean;
-  bold?: boolean;
-  last?: boolean;
-}) {
-  if (value === undefined || value === null) return null;
-
-  return (
-    <View style={[s.nutriRow, !last && s.nutriRowBorder, sub && s.nutriRowSub]}>
-      <Text style={[s.nutriLabel, bold && s.nutriBold, sub && s.nutriMuted]}>
-        {label}
-      </Text>
-      <Text style={[s.nutriValue, bold && s.nutriBold, sub && s.nutriMuted]}>
-        {Number.isInteger(value) ? value : value.toFixed(1)} {unit}
-      </Text>
-    </View>
-  );
 }
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -100,13 +55,21 @@ const CO2_FACTOR: Record<string, number> = {
   train: 0.022,
 };
 
-function calcFootprint(steps: { lat: number; lng: number; transportMode?: string }[]) {
+function calcFootprint(
+  steps: { lat: number; lng: number; transportMode?: string }[],
+) {
   let totalKm = 0;
   let co2 = 0;
   for (let i = 0; i < steps.length - 1; i++) {
-    const km = haversineKm(steps[i].lat, steps[i].lng, steps[i + 1].lat, steps[i + 1].lng);
+    const km = haversineKm(
+      steps[i].lat,
+      steps[i].lng,
+      steps[i + 1].lat,
+      steps[i + 1].lng,
+    );
     totalKm += km;
-    co2 += km * (CO2_FACTOR[steps[i].transportMode ?? 'truck'] ?? CO2_FACTOR.truck);
+    co2 +=
+      km * (CO2_FACTOR[steps[i].transportMode ?? "truck"] ?? CO2_FACTOR.truck);
   }
   return { totalKm: Math.round(totalKm), co2PerTon: Math.round(co2 * 10) / 10 };
 }
@@ -229,7 +192,7 @@ export default function ProductSheet() {
     );
   }
 
-  const { product, producer, batch } = result;
+  const { product, producer } = result;
   const nutrition = product.nutrition?.per100 ?? {};
   const qs = product.qualityScores ?? {};
 
@@ -446,20 +409,23 @@ export default function ProductSheet() {
             </Card>
           </View>
 
-
           <View style={s.section}>
             <Card style={s.supplyChainCard}>
               <Text style={s.supplyChainTitle}>Supply Chain</Text>
               <View style={s.supplyChainList}>
-                {(result.supplyChainSteps ?? []).map((step: any, i: number, arr: any[]) => (
-                  <View key={i} style={s.supplyChainItem}>
-                    <View style={s.supplyChainLeft}>
-                      <View style={s.supplyChainDot} />
-                      {i < arr.length - 1 ? <View style={s.supplyChainLine} /> : null}
+                {(result.supplyChainSteps ?? []).map(
+                  (step: any, i: number, arr: any[]) => (
+                    <View key={i} style={s.supplyChainItem}>
+                      <View style={s.supplyChainLeft}>
+                        <View style={s.supplyChainDot} />
+                        {i < arr.length - 1 ? (
+                          <View style={s.supplyChainLine} />
+                        ) : null}
+                      </View>
+                      <Text style={s.supplyChainLabel}>{step.label}</Text>
                     </View>
-                    <Text style={s.supplyChainLabel}>{step.label}</Text>
-                  </View>
-                ))}
+                  ),
+                )}
               </View>
               <Image
                 source={globeImage}
@@ -477,7 +443,7 @@ export default function ProductSheet() {
                 <Text style={s.footprintLabel}>Distance traveled</Text>
                 {footprint.totalKm > 0 ? (
                   <Text style={s.footprintValue}>
-                    {footprint.totalKm.toLocaleString()}{' '}
+                    {footprint.totalKm.toLocaleString()}{" "}
                     <Text style={s.footprintUnit}>km</Text>
                   </Text>
                 ) : (
@@ -488,7 +454,7 @@ export default function ProductSheet() {
                 <View style={s.footprintRow}>
                   <Text style={s.footprintLabel}>CO₂ per ton of product</Text>
                   <Text style={s.footprintValue}>
-                    {footprint.co2PerTon.toLocaleString()}{' '}
+                    {footprint.co2PerTon.toLocaleString()}{" "}
                     <Text style={s.footprintUnit}>kg</Text>
                   </Text>
                 </View>
@@ -501,8 +467,6 @@ export default function ProductSheet() {
               />
             </Card>
           </View>
-
-
         </ScrollView>
 
         {/* Floating AI button — bottom right */}
@@ -882,14 +846,14 @@ const s = StyleSheet.create({
     color: ios26Colors.surfaceHigh,
   },
   supplyChainCard: {
-    overflow: 'hidden',
-    backgroundColor: 'white',
-    borderColor: '#cfe1f1',
+    overflow: "hidden",
+    backgroundColor: "white",
+    borderColor: "#cfe1f1",
     borderWidth: 1,
   },
   supplyChainTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: ios26Colors.textPrimary,
     letterSpacing: -0.3,
     marginBottom: 8,
@@ -899,19 +863,19 @@ const s = StyleSheet.create({
     paddingRight: 100,
   },
   supplyChainItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: 12,
   },
   supplyChainLeft: {
-    alignItems: 'center',
+    alignItems: "center",
     width: 16,
   },
   supplyChainDot: {
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: '#C8DCF0',
+    backgroundColor: "#C8DCF0",
     marginTop: 4,
     flexShrink: 0,
   },
@@ -920,8 +884,8 @@ const s = StyleSheet.create({
     flex: 1,
     minHeight: 18,
     borderLeftWidth: 2,
-    borderLeftColor: '#C8DCF0',
-    borderStyle: 'dashed',
+    borderLeftColor: "#C8DCF0",
+    borderStyle: "dashed",
     marginTop: 2,
     marginBottom: 2,
   },
@@ -932,24 +896,24 @@ const s = StyleSheet.create({
     lineHeight: 22,
   },
   globeImage: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -20,
     right: -20,
     width: 150,
     height: 150,
     opacity: 0.9,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
   footprintCard: {
-    overflow: 'hidden',
-    backgroundColor: 'white',
-    borderColor: '#cfe1f1',
+    overflow: "hidden",
+    backgroundColor: "white",
+    borderColor: "#cfe1f1",
     borderWidth: 1,
     gap: 10,
   },
   footprintTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: ios26Colors.textPrimary,
     letterSpacing: -0.3,
     marginBottom: 4,
@@ -964,14 +928,14 @@ const s = StyleSheet.create({
   },
   footprintValue: {
     fontSize: 36,
-    fontWeight: '700',
+    fontWeight: "700",
     color: ios26Colors.textPrimary,
     letterSpacing: -1,
     lineHeight: 42,
   },
   footprintUnit: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: "500",
     letterSpacing: 0,
   },
   footprintMuted: {
@@ -979,13 +943,13 @@ const s = StyleSheet.create({
     color: ios26Colors.textMuted,
   },
   footstepImage: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -10,
     right: -10,
     width: 130,
     height: 130,
     opacity: 0.9,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
   producerCard: {
     flexDirection: "row",

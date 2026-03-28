@@ -16,7 +16,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bubbleImage = require("@/assets/images/circle-bubble.png") as number;
 
 export default function EmailScreen() {
@@ -57,7 +56,9 @@ export default function EmailScreen() {
       >
         {/* Centered hero title */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>Track your food.{"\n"}Know its story.</Text>
+          <Text style={styles.heroTitle}>
+            Track your food.{"\n"}Know its story.
+          </Text>
         </View>
 
         {/* Form section */}
