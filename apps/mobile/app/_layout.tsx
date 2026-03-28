@@ -20,7 +20,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="profile" options={ios26ModalOptions} />
-            <Stack.Screen name="chat" options={{ headerShown: false }} />
+            <Stack.Screen name="chat" />
             <Stack.Screen
               name="product"
               options={{

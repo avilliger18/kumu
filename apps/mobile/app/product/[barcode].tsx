@@ -21,19 +21,21 @@ import {
 } from "@/constants/ios26-navigation";
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const herbImage = require("@/assets/images/herb.png") as number;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const appleImage = require("@/assets/images/apple.png") as number;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const footstepImage = require("@/assets/images/footstep.png") as number;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const globeImage = require("@/assets/images/globe.png") as number;
+
 const NUTRI: Record<string, { bg: string; fg: string }> = {
   A: { bg: "#1A9E5A", fg: "#fff" },
   B: { bg: "#7AC547", fg: "#fff" },
   C: { bg: "#E6AE00", fg: "#000" },
   D: { bg: "#EF7D1A", fg: "#fff" },
   E: { bg: "#E03520", fg: "#fff" },
-};
-
-const NOVA_COLOR: Record<number, string> = {
-  1: "#1A9E5A",
-  2: "#7AC547",
-  3: "#EF7D1A",
-  4: "#E03520",
 };
 
 function SectionHeader({ title }: { title: string }) {
@@ -79,32 +81,34 @@ function NutrientRow({
   );
 }
 
-function ScorePill({
-  letter,
-  label,
-  note,
-  bg,
-  fg = "#fff",
-}: {
-  letter: string;
-  label: string;
-  note?: string;
-  bg: string;
-  fg?: string;
-}) {
-  const subColor = fg === "#fff" ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.6)";
-  const noteColor =
-    fg === "#fff" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.5)";
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
-  return (
-    <View style={[s.scorePill, { backgroundColor: bg }]}>
-      <Text style={[s.scoreLetter, { color: fg }]}>{letter}</Text>
-      <Text style={[s.scoreLabel, { color: subColor }]}>{label}</Text>
-      {note ? (
-        <Text style={[s.scoreNote, { color: noteColor }]}>{note}</Text>
-      ) : null}
-    </View>
-  );
+const CO2_FACTOR: Record<string, number> = {
+  ship: 0.01,
+  plane: 0.602,
+  truck: 0.062,
+  train: 0.022,
+};
+
+function calcFootprint(steps: { lat: number; lng: number; transportMode?: string }[]) {
+  let totalKm = 0;
+  let co2 = 0;
+  for (let i = 0; i < steps.length - 1; i++) {
+    const km = haversineKm(steps[i].lat, steps[i].lng, steps[i + 1].lat, steps[i + 1].lng);
+    totalKm += km;
+    co2 += km * (CO2_FACTOR[steps[i].transportMode ?? 'truck'] ?? CO2_FACTOR.truck);
+  }
+  return { totalKm: Math.round(totalKm), co2PerTon: Math.round(co2 * 10) / 10 };
 }
 
 export default function ProductSheet() {
@@ -229,9 +233,7 @@ export default function ProductSheet() {
   const nutrition = product.nutrition?.per100 ?? {};
   const qs = product.qualityScores ?? {};
 
-  const co2Distance = Math.floor(20000 + Math.random() * 40000)
-    .toLocaleString("de-CH")
-    .replace(",", "'");
+  const footprint = calcFootprint(result.supplyChainSteps ?? []);
 
   return (
     <>
@@ -244,7 +246,8 @@ export default function ProductSheet() {
           contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
         >
           <View style={s.heroCard}>
-            <View style={s.heroImageArea}>
+            {/* Left: product image */}
+            <View style={s.heroLeft}>
               {product.thumbnailUrl ? (
                 <Image
                   source={{ uri: product.thumbnailUrl }}
@@ -258,269 +261,248 @@ export default function ProductSheet() {
                   tintColor={ios26Colors.surfaceHigh}
                 />
               )}
+            </View>
 
-              {qs.nutriScore ? (
-                <View
-                  style={[
-                    s.nutriBadge,
-                    {
-                      backgroundColor:
-                        NUTRI[qs.nutriScore]?.bg ?? ios26Colors.surfaceElevated,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      s.nutriBadgeLetter,
-                      { color: NUTRI[qs.nutriScore]?.fg ?? "#fff" },
-                    ]}
-                  >
-                    {qs.nutriScore}
-                  </Text>
-                  <Text
-                    style={[
-                      s.nutriBadgeLabel,
-                      {
-                        color:
-                          NUTRI[qs.nutriScore]?.fg === "#000"
-                            ? "rgba(0,0,0,0.55)"
-                            : "rgba(255,255,255,0.7)",
-                      },
-                    ]}
-                  >
-                    {"Nutri\nScore"}
-                  </Text>
+            {/* Right: info */}
+            <View style={s.heroRight}>
+              {/* <Text style={s.heroTitle} numberOfLines={2}>
+                {product.title}
+              </Text> */}
+              <Text style={s.heroBrand}>
+                {producer?.displayName ?? "Unknown"}
+              </Text>
+              <Text style={s.heroBarcode}>Barcode: {barcode}</Text>
+
+              {/* Kumu Score */}
+              {qs.overallFoodScore !== undefined ? (
+                <View style={s.kumuSection}>
+                  <View style={s.kumuHeader}>
+                    <Text style={s.kumuLabel}>Kumu Score</Text>
+                    <View style={s.kumuInfoBtn}>
+                      <Text style={s.kumuInfoText}>?</Text>
+                    </View>
+                  </View>
+                  <View style={s.kumuBar}>
+                    <View
+                      style={[
+                        s.kumuBarFill,
+                        { width: `${qs.overallFoodScore}%` as any },
+                      ]}
+                    />
+                    <View
+                      style={[
+                        s.kumuBarThumb,
+                        {
+                          left: `${qs.overallFoodScore}%` as any,
+                          marginLeft: -14,
+                        },
+                      ]}
+                    />
+                    <Text style={s.kumuBarScore}>
+                      {qs.overallFoodScore}/100
+                    </Text>
+                  </View>
                 </View>
               ) : null}
-            </View>
 
-            <View style={s.heroText}>
-              <Text style={s.heroTitle} numberOfLines={2}>
-                {product.title}
-              </Text>
-              {product.subtitle ? (
-                <Text style={s.heroSubtitle}>{product.subtitle}</Text>
-              ) : null}
-              <View style={s.heroBrandRow}>
-                <Text style={s.heroBrand}>
-                  {producer?.displayName ?? "Unknown"}
-                </Text>
-                {product.category ? (
-                  <>
-                    <Text style={s.heroDot}>/</Text>
-                    <Text style={s.heroCategory}>{product.category}</Text>
-                  </>
-                ) : null}
+              {/* Labels */}
+              <View style={s.labelsSection}>
+                <Text style={s.labelsTitle}>Labels</Text>
+                <View style={s.labelsRow}>
+                  {(product.labels ?? []).length > 0
+                    ? (product.labels as string[]).map((label) => (
+                        <View key={label} style={s.labelBadge}>
+                          <Text style={s.labelBadgeText}>{label}</Text>
+                        </View>
+                      ))
+                    : null}
+                  <Pressable
+                    style={({ pressed }) => [
+                      s.certBtn,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                  >
+                    <Text style={s.certBtnText}>View certificates</Text>
+                  </Pressable>
+                </View>
               </View>
-              <Text style={s.heroBarcode}>{barcode}</Text>
             </View>
-
-            {qs.novaGroup || qs.overallFoodScore !== undefined ? (
-              <View style={s.scoreStrip}>
-                {qs.novaGroup ? (
-                  <ScorePill
-                    letter={String(qs.novaGroup)}
-                    label="NOVA"
-                    note={qs.processingLevel}
-                    bg={NOVA_COLOR[qs.novaGroup] ?? ios26Colors.surfaceElevated}
-                  />
-                ) : null}
-                {qs.overallFoodScore !== undefined ? (
-                  <ScorePill
-                    letter={String(qs.overallFoodScore)}
-                    label="Food score"
-                    bg={ios26Colors.surfaceElevated}
-                  />
-                ) : null}
-              </View>
-            ) : null}
           </View>
 
           {product.ingredientsText ? (
             <View style={s.section}>
-              <SectionHeader title="Ingredients" />
-              <Card>
-                <Text style={s.ingredientsText}>{product.ingredientsText}</Text>
+              <Card style={s.ingredientsCard}>
+                <Text style={s.ingredientsTitle}>Ingredients</Text>
+                <View style={s.ingredientsList}>
+                  {product.ingredientsText
+                    .split(",")
+                    .map((item: string) => item.trim())
+                    .filter(Boolean)
+                    .map((ingredient: string, i: number) => (
+                      <View key={i} style={s.ingredientRow}>
+                        <Text style={s.ingredientBullet}>{"•"}</Text>
+                        <Text style={s.ingredientText}>{ingredient}</Text>
+                      </View>
+                    ))}
+                </View>
+                <Image
+                  source={herbImage}
+                  style={s.herbImage}
+                  contentFit="contain"
+                  pointerEvents="none"
+                />
               </Card>
             </View>
           ) : null}
 
           <View style={s.section}>
-            <SectionHeader
-              title={`Nutritional values - per ${product.nutrition?.referenceBasis ?? "100g"}`}
-            />
-            <Card style={s.cardNoPad}>
-              <NutrientRow
-                label="Energy"
-                value={nutrition.energyKcal}
-                unit="kcal"
-                bold
+            <Card style={s.nutritionCard}>
+              <Text style={s.nutritionTitle}>
+                Nutritional values (per{" "}
+                {product.nutrition?.referenceBasis ?? "100g"})
+              </Text>
+              <View style={s.nutritionList}>
+                {nutrition.energyKcal !== undefined &&
+                nutrition.energyKcal !== null ? (
+                  <View style={s.ingredientRow}>
+                    <Text style={s.ingredientBullet}>{"•"}</Text>
+                    <Text style={s.ingredientText}>
+                      Energy:{" "}
+                      {Number.isInteger(nutrition.energyKcal)
+                        ? nutrition.energyKcal
+                        : nutrition.energyKcal.toFixed(1)}{" "}
+                      kcal
+                    </Text>
+                  </View>
+                ) : null}
+                {nutrition.sugars !== undefined && nutrition.sugars !== null ? (
+                  <View style={s.ingredientRow}>
+                    <Text style={s.ingredientBullet}>{"•"}</Text>
+                    <Text style={s.ingredientText}>
+                      Sugar:{" "}
+                      {Number.isInteger(nutrition.sugars)
+                        ? nutrition.sugars
+                        : nutrition.sugars.toFixed(1)}{" "}
+                      g
+                    </Text>
+                  </View>
+                ) : null}
+                {nutrition.fat !== undefined && nutrition.fat !== null ? (
+                  <View style={s.ingredientRow}>
+                    <Text style={s.ingredientBullet}>{"•"}</Text>
+                    <Text style={s.ingredientText}>
+                      Fat:{" "}
+                      {Number.isInteger(nutrition.fat)
+                        ? nutrition.fat
+                        : nutrition.fat.toFixed(1)}{" "}
+                      g
+                    </Text>
+                  </View>
+                ) : null}
+                {nutrition.carbs !== undefined && nutrition.carbs !== null ? (
+                  <View style={s.ingredientRow}>
+                    <Text style={s.ingredientBullet}>{"•"}</Text>
+                    <Text style={s.ingredientText}>
+                      Carbohydrates:{" "}
+                      {Number.isInteger(nutrition.carbs)
+                        ? nutrition.carbs
+                        : nutrition.carbs.toFixed(1)}{" "}
+                      g
+                    </Text>
+                  </View>
+                ) : null}
+                {nutrition.protein !== undefined &&
+                nutrition.protein !== null ? (
+                  <View style={s.ingredientRow}>
+                    <Text style={s.ingredientBullet}>{"•"}</Text>
+                    <Text style={s.ingredientText}>
+                      Protein:{" "}
+                      {Number.isInteger(nutrition.protein)
+                        ? nutrition.protein
+                        : nutrition.protein.toFixed(1)}{" "}
+                      g
+                    </Text>
+                  </View>
+                ) : null}
+                {nutrition.salt !== undefined && nutrition.salt !== null ? (
+                  <View style={s.ingredientRow}>
+                    <Text style={s.ingredientBullet}>{"•"}</Text>
+                    <Text style={s.ingredientText}>
+                      Salt:{" "}
+                      {Number.isInteger(nutrition.salt)
+                        ? nutrition.salt
+                        : nutrition.salt.toFixed(3)}{" "}
+                      g
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+              <Image
+                source={appleImage}
+                style={s.appleImage}
+                contentFit="contain"
+                pointerEvents="none"
               />
-              <NutrientRow label="Fat" value={nutrition.fat} bold />
-              <NutrientRow
-                label="of which saturates"
-                value={nutrition.saturatedFat}
-                sub
-              />
-              <NutrientRow label="Carbohydrates" value={nutrition.carbs} bold />
-              <NutrientRow
-                label="of which sugars"
-                value={nutrition.sugars}
-                sub
-              />
-              <NutrientRow label="Fibre" value={nutrition.fiber} />
-              <NutrientRow label="Protein" value={nutrition.protein} bold />
-              <NutrientRow label="Salt" value={nutrition.salt} />
-              {nutrition.calcium !== undefined ? (
-                <NutrientRow
-                  label="Calcium"
-                  value={nutrition.calcium}
-                  unit="mg"
-                />
-              ) : null}
-              {nutrition.iron !== undefined ? (
-                <NutrientRow label="Iron" value={nutrition.iron} unit="mg" />
-              ) : null}
-              {nutrition.magnesium !== undefined ? (
-                <NutrientRow
-                  label="Magnesium"
-                  value={nutrition.magnesium}
-                  unit="mg"
-                  last
-                />
-              ) : !nutrition.iron && !nutrition.calcium ? (
-                <NutrientRow label="Salt" value={nutrition.salt} last />
-              ) : null}
             </Card>
           </View>
 
-          {product.additives?.length > 0 ? (
-            <View style={s.section}>
-              <SectionHeader title="Additives" />
-              <Card style={s.cardNoPad}>
-                {product.additives.map((additive: any, index: number) => (
-                  <View
-                    key={additive.code}
-                    style={[
-                      s.additiveRow,
-                      index < product.additives.length - 1 && s.additiveBorder,
-                    ]}
-                  >
-                    <Text style={s.additiveCode}>{additive.code}</Text>
-                    <Text style={s.additiveName} numberOfLines={1}>
-                      {additive.name ?? additive.code}
-                    </Text>
-                    <View
-                      style={[
-                        s.riskChip,
-                        additive.riskLevel === "low" && s.riskLow,
-                        additive.riskLevel === "moderate" && s.riskMid,
-                        additive.riskLevel === "high" && s.riskHigh,
-                      ]}
-                    >
-                      <Text style={s.riskChipText}>{additive.riskLevel}</Text>
+
+          <View style={s.section}>
+            <Card style={s.supplyChainCard}>
+              <Text style={s.supplyChainTitle}>Supply Chain</Text>
+              <View style={s.supplyChainList}>
+                {(result.supplyChainSteps ?? []).map((step: any, i: number, arr: any[]) => (
+                  <View key={i} style={s.supplyChainItem}>
+                    <View style={s.supplyChainLeft}>
+                      <View style={s.supplyChainDot} />
+                      {i < arr.length - 1 ? <View style={s.supplyChainLine} /> : null}
                     </View>
+                    <Text style={s.supplyChainLabel}>{step.label}</Text>
                   </View>
                 ))}
-              </Card>
-            </View>
-          ) : null}
-
-          <View style={s.section}>
-            <SectionHeader title="Production" />
-            <Pressable
-              onPress={() => router.push("/product/production")}
-              style={({ pressed }) => [
-                s.card,
-                s.productionRow,
-                pressed && s.productionRowPressed,
-              ]}
-            >
-              <SymbolView
-                name="globe.europe.africa.fill"
-                style={s.productionIcon}
-                tintColor={ios26Colors.textMuted}
-                type="hierarchical"
+              </View>
+              <Image
+                source={globeImage}
+                style={s.globeImage}
+                contentFit="contain"
+                pointerEvents="none"
               />
-              <View style={s.productionText}>
-                <Text style={s.productionTitle}>Supply chain</Text>
-                <Text style={s.productionSub}>
-                  Origin, manufacturing & logistics
-                </Text>
-              </View>
-              <Text style={s.productionChevron}>{">"}</Text>
-            </Pressable>
-          </View>
-
-          <View style={s.section}>
-            <SectionHeader title="Ecological Footprint" />
-            <Card>
-              <Text style={s.co2Label}>Distance traveled</Text>
-              <Text style={s.co2Value}>
-                {co2Distance} <Text style={s.co2Unit}>km</Text>
-              </Text>
-              <View style={s.co2Bar}>
-                <View style={s.co2BarFill} />
-              </View>
             </Card>
           </View>
 
           <View style={s.section}>
-            <SectionHeader title="Producer" />
-            <Card style={s.producerCard}>
-              <View style={s.producerLeft}>
-                <Text style={s.producerName}>{producer?.displayName}</Text>
-                {producer?.name && producer.name !== producer.displayName ? (
-                  <Text style={s.producerLegal}>{producer.name}</Text>
-                ) : null}
-                {producer?.countryCode ? (
-                  <Text style={s.producerCountry}>{producer.countryCode}</Text>
-                ) : null}
+            <Card style={s.footprintCard}>
+              <Text style={s.footprintTitle}>Ecological footprint</Text>
+              <View style={s.footprintRow}>
+                <Text style={s.footprintLabel}>Distance traveled</Text>
+                {footprint.totalKm > 0 ? (
+                  <Text style={s.footprintValue}>
+                    {footprint.totalKm.toLocaleString()}{' '}
+                    <Text style={s.footprintUnit}>km</Text>
+                  </Text>
+                ) : (
+                  <Text style={s.footprintMuted}>No data</Text>
+                )}
               </View>
-              {producer?.verificationStatus === "verified" ? (
-                <SymbolView
-                  name="checkmark.seal.fill"
-                  style={s.verifiedIcon}
-                  tintColor={ios26Colors.success}
-                  type="hierarchical"
-                />
-              ) : null}
-            </Card>
-          </View>
-
-          {batch ? (
-            <View style={s.section}>
-              <SectionHeader title="Batch traceability" />
-              <View style={s.batchGrid}>
-                <View style={s.batchCell}>
-                  <Text style={s.batchKey}>Lot code</Text>
-                  <Text style={s.batchVal}>{batch.batchCodeRaw}</Text>
+              {footprint.co2PerTon > 0 ? (
+                <View style={s.footprintRow}>
+                  <Text style={s.footprintLabel}>CO₂ per ton of product</Text>
+                  <Text style={s.footprintValue}>
+                    {footprint.co2PerTon.toLocaleString()}{' '}
+                    <Text style={s.footprintUnit}>kg</Text>
+                  </Text>
                 </View>
-                {batch.originCountry ? (
-                  <View style={s.batchCell}>
-                    <Text style={s.batchKey}>Origin</Text>
-                    <Text style={s.batchVal}>{batch.originCountry}</Text>
-                  </View>
-                ) : null}
-                {batch.manufacturedAt ? (
-                  <View style={s.batchCell}>
-                    <Text style={s.batchKey}>Manufactured</Text>
-                    <Text style={s.batchVal}>
-                      {new Date(batch.manufacturedAt).toLocaleDateString()}
-                    </Text>
-                  </View>
-                ) : null}
-                {batch.bestBeforeAt ? (
-                  <View style={s.batchCell}>
-                    <Text style={s.batchKey}>Best before</Text>
-                    <Text style={s.batchVal}>
-                      {new Date(batch.bestBeforeAt).toLocaleDateString()}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            </View>
-          ) : null}
+              ) : null}
+              <Image
+                source={footstepImage}
+                style={s.footstepImage}
+                contentFit="contain"
+                pointerEvents="none"
+              />
+            </Card>
+          </View>
+
+
         </ScrollView>
 
         {/* Floating AI button — bottom right */}
@@ -599,94 +581,182 @@ const s = StyleSheet.create({
     fontWeight: "600",
   },
   heroCard: {
+    flexDirection: "row",
     backgroundColor: ios26Colors.surface,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     marginBottom: 8,
-    overflow: "hidden",
+    gap: 14,
+    alignItems: "flex-start",
   },
-  heroImageArea: {
-    width: "100%",
-    height: 220,
+  heroLeft: {
+    width: 120,
+    height: 150,
+    borderRadius: ios26Radii.card,
     backgroundColor: ios26Colors.surfaceElevated,
-    alignItems: "center",
-    justifyContent: "center",
+    overflow: "hidden",
+    flexShrink: 0,
   },
   heroImage: {
     width: "100%",
     height: "100%",
   },
   heroPlaceholderIcon: {
-    width: 64,
-    height: 64,
+    width: 48,
+    height: 48,
+    alignSelf: "center",
+    marginTop: 48,
   },
   nutriBadge: {
     position: "absolute",
-    bottom: 14,
-    right: 14,
+    bottom: 6,
+    right: 6,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: ios26Radii.md,
+    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
   nutriBadgeLetter: {
-    fontSize: 22,
+    fontSize: 14,
     fontWeight: "800",
-    lineHeight: 26,
+    lineHeight: 16,
   },
   nutriBadgeLabel: {
-    fontSize: 9,
+    fontSize: 7,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
-    lineHeight: 12,
+    letterSpacing: 0.2,
+    lineHeight: 9,
   },
-  heroText: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 14,
-    gap: 3,
+  heroRight: {
+    flex: 1,
+    gap: 2,
   },
   heroTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "700",
     color: ios26Colors.textPrimary,
-    letterSpacing: -0.4,
-  },
-  heroSubtitle: {
-    fontSize: 15,
-    color: ios26Colors.textMuted,
-  },
-  heroBrandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 4,
+    letterSpacing: -0.3,
+    lineHeight: 22,
   },
   heroBrand: {
-    fontSize: 14,
-    color: ios26Colors.textMuted,
-  },
-  heroDot: {
-    fontSize: 14,
-    color: ios26Colors.surfaceHigh,
-  },
-  heroCategory: {
-    fontSize: 14,
-    color: ios26Colors.textMuted,
+    fontSize: 13,
+    color: "#1B3A5B",
+    marginTop: 1,
+    fontWeight: "700",
   },
   heroBarcode: {
     fontSize: 12,
-    color: ios26Colors.surfaceHigh,
-    marginTop: 4,
+    color: ios26Colors.textMuted,
     fontVariant: ["tabular-nums"],
+    marginTop: 1,
   },
-  scoreStrip: {
+  kumuSection: {
+    marginTop: 10,
+    gap: 6,
+  },
+  kumuHeader: {
     flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 20,
-    paddingBottom: 18,
+    alignItems: "center",
+    gap: 6,
+  },
+  kumuLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: ios26Colors.textPrimary,
+  },
+  kumuInfoBtn: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#FF459F",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  kumuInfoText: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: "#FF459F",
+    lineHeight: 11,
+  },
+  kumuBar: {
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#FFD6EA",
+    overflow: "visible",
+    justifyContent: "center",
+    position: "relative",
+  },
+  kumuBarFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: "#FF459F",
+    borderRadius: 14,
+  },
+  kumuBarThumb: {
+    position: "absolute",
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#FFFFFF",
+    top: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  kumuBarScore: {
+    position: "absolute",
+    right: 10,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  labelsSection: {
+    marginTop: 10,
+    gap: 5,
+  },
+  labelsTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: ios26Colors.textPrimary,
+  },
+  labelsRow: {
+    flexDirection: "row",
     flexWrap: "wrap",
+    gap: 6,
+    alignItems: "center",
+  },
+  labelBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: ios26Colors.surfaceElevated,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: ios26Colors.separator,
+  },
+  labelBadgeText: {
+    fontSize: 11,
+    color: ios26Colors.textMuted,
+    fontWeight: "500",
+  },
+  certBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: ios26Colors.separator,
+  },
+  certBtnText: {
+    fontSize: 11,
+    color: ios26Colors.textPrimary,
+    fontWeight: "500",
   },
   section: {
     paddingHorizontal: 20,
@@ -710,33 +780,76 @@ const s = StyleSheet.create({
     padding: 0,
     overflow: "hidden",
   },
-  scorePill: {
-    minWidth: 80,
-    borderRadius: ios26Radii.md,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    alignItems: "center",
-    gap: 2,
+  ingredientsCard: {
+    overflow: "hidden",
+    backgroundColor: "white",
+    borderColor: "#cfe1f1",
+    borderWidth: 1,
   },
-  scoreLetter: {
-    fontSize: 28,
-    fontWeight: "800",
-    lineHeight: 32,
+  nutritionCard: {
+    overflow: "hidden",
+    backgroundColor: "white",
+    borderColor: "#cfe1f1",
+    borderWidth: 1,
   },
-  scoreLabel: {
-    fontSize: 10,
+  nutritionTitle: {
+    fontSize: 20,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    color: ios26Colors.textPrimary,
+    marginBottom: 12,
+    letterSpacing: -0.3,
+    paddingRight: 80,
   },
-  scoreNote: {
-    fontSize: 10,
-    textAlign: "center",
+  nutritionList: {
+    gap: 4,
+    paddingRight: 80,
   },
-  ingredientsText: {
-    color: ios26Colors.textMuted,
+  appleImage: {
+    position: "absolute",
+    bottom: -15,
+    right: -15,
+    width: 130,
+    height: 130,
+    transform: [{ rotate: "-15deg" }],
+    opacity: 0.9,
+    pointerEvents: "none",
+  },
+  ingredientsTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: ios26Colors.textPrimary,
+    marginBottom: 12,
+    letterSpacing: -0.3,
+  },
+  ingredientsList: {
+    gap: 4,
+    paddingRight: 80,
+  },
+  ingredientRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "flex-start",
+  },
+  ingredientBullet: {
     fontSize: 14,
+    color: ios26Colors.textMuted,
     lineHeight: 22,
+  },
+  ingredientText: {
+    flex: 1,
+    fontSize: 14,
+    color: ios26Colors.textMuted,
+    lineHeight: 22,
+  },
+  herbImage: {
+    position: "absolute",
+    bottom: -20,
+    right: -10,
+    width: 120,
+    height: 120,
+    transform: [{ rotate: "-15deg" }],
+    opacity: 0.9,
+    pointerEvents: "none",
   },
   nutriRow: {
     flexDirection: "row",
@@ -768,108 +881,111 @@ const s = StyleSheet.create({
     fontSize: 14,
     color: ios26Colors.surfaceHigh,
   },
-  additiveRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 11,
-    paddingHorizontal: 16,
+  supplyChainCard: {
+    overflow: 'hidden',
+    backgroundColor: 'white',
+    borderColor: '#cfe1f1',
+    borderWidth: 1,
   },
-  additiveBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: ios26Colors.separator,
-  },
-  additiveCode: {
-    width: 42,
-    color: ios26Colors.accent,
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  additiveName: {
-    flex: 1,
-    color: ios26Colors.textMuted,
-    fontSize: 14,
-  },
-  riskChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    backgroundColor: ios26Colors.surfaceElevated,
-  },
-  riskLow: {
-    backgroundColor: "rgba(48,209,88,0.14)",
-  },
-  riskMid: {
-    backgroundColor: "rgba(255,159,10,0.14)",
-  },
-  riskHigh: {
-    backgroundColor: "rgba(255,69,58,0.14)",
-  },
-  riskChipText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: ios26Colors.textMuted,
-    textTransform: "capitalize",
-  },
-  productionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    padding: 16,
-  },
-  productionRowPressed: {
-    backgroundColor: ios26Colors.surfaceHigh,
-  },
-  productionIcon: {
-    width: 32,
-    height: 32,
-  },
-  productionText: {
-    flex: 1,
-    gap: 3,
-  },
-  productionTitle: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: ios26Colors.textPrimary,
-  },
-  productionSub: {
-    fontSize: 13,
-    color: ios26Colors.textMuted,
-  },
-  productionChevron: {
+  supplyChainTitle: {
     fontSize: 20,
-    color: ios26Colors.textMuted,
-    fontWeight: "300",
+    fontWeight: '700',
+    color: ios26Colors.textPrimary,
+    letterSpacing: -0.3,
+    marginBottom: 8,
   },
-  co2Label: {
-    fontSize: 13,
-    color: ios26Colors.textMuted,
+  supplyChainList: {
+    gap: 0,
+    paddingRight: 100,
+  },
+  supplyChainItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  supplyChainLeft: {
+    alignItems: 'center',
+    width: 16,
+  },
+  supplyChainDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#C8DCF0',
+    marginTop: 4,
+    flexShrink: 0,
+  },
+  supplyChainLine: {
+    width: 2,
+    flex: 1,
+    minHeight: 18,
+    borderLeftWidth: 2,
+    borderLeftColor: '#C8DCF0',
+    borderStyle: 'dashed',
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  supplyChainLabel: {
+    fontSize: 15,
+    color: ios26Colors.textPrimary,
+    paddingBottom: 16,
+    lineHeight: 22,
+  },
+  globeImage: {
+    position: 'absolute',
+    bottom: -20,
+    right: -20,
+    width: 150,
+    height: 150,
+    opacity: 0.9,
+    pointerEvents: 'none',
+  },
+  footprintCard: {
+    overflow: 'hidden',
+    backgroundColor: 'white',
+    borderColor: '#cfe1f1',
+    borderWidth: 1,
+    gap: 10,
+  },
+  footprintTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: ios26Colors.textPrimary,
+    letterSpacing: -0.3,
     marginBottom: 4,
   },
-  co2Value: {
-    fontSize: 40,
-    fontWeight: "700",
+  footprintRow: {
+    gap: 2,
+    paddingRight: 100,
+  },
+  footprintLabel: {
+    fontSize: 13,
+    color: ios26Colors.textMuted,
+  },
+  footprintValue: {
+    fontSize: 36,
+    fontWeight: '700',
     color: ios26Colors.textPrimary,
     letterSpacing: -1,
+    lineHeight: 42,
   },
-  co2Unit: {
-    fontSize: 22,
-    fontWeight: "500",
+  footprintUnit: {
+    fontSize: 20,
+    fontWeight: '500',
     letterSpacing: 0,
   },
-  co2Bar: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: ios26Colors.surfaceElevated,
-    marginTop: 14,
-    overflow: "hidden",
+  footprintMuted: {
+    fontSize: 15,
+    color: ios26Colors.textMuted,
   },
-  co2BarFill: {
-    width: "62%",
-    height: "100%",
-    borderRadius: 2,
-    backgroundColor: ios26Colors.warning,
+  footstepImage: {
+    position: 'absolute',
+    bottom: -10,
+    right: -10,
+    width: 130,
+    height: 130,
+    opacity: 0.9,
+    pointerEvents: 'none',
   },
   producerCard: {
     flexDirection: "row",

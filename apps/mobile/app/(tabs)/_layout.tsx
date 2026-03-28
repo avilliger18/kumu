@@ -33,7 +33,7 @@ export default function TabLayout() {
   };
 
   return (
-    <NativeTabs minimizeBehavior="onScrollDown">
+    <NativeTabs minimizeBehavior="onScrollDown" iconColor="#1B3A5B">
       <NativeTabs.Trigger {...overviewTriggerProps} />
       <NativeTabs.Trigger
         name="scan"

@@ -26,6 +26,8 @@ coverage
 out/
 build
 dist
+_pagefind/
+*.tsbuildinfo
 
 
 # Debug

@@ -63,9 +63,9 @@ export const resolveProductByScan = query({
         subtitle: "Hazelnut & Cocoa Spread",
         brandLabel: "Ferrero",
         thumbnailUrl:
-          "https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.820.400.jpg",
+          "https://www.pngplay.com/wp-content/uploads/15/Nutella-Transparent-Images.png",
         imageUrls: [
-          "https://images.openfoodfacts.org/images/products/301/762/042/2003/front_en.820.400.jpg",
+          "https://www.pngplay.com/wp-content/uploads/15/Nutella-Transparent-Images.png",
         ],
         category: "Spreads",
         subcategories: ["Chocolate Spreads", "Hazelnut Spreads"],
