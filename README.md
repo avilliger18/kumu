@@ -65,4 +65,5 @@ Hinweis: Die veröffentlichte Seite startet aktuell mit einem Sign-in-Screen.
 | [Lieferantenguide](docs/lieferantenguide.md)                        | Firmenprofil, Produktpflege, Supply-Chain-Daten und Alerts     |
 | [Technik und Betrieb](docs/technik-und-betrieb.md)                  | Monorepo, Frontends, Backend, CI und Deployment                |
 | [Testing und Demo](docs/testing-und-demo.md)                        | Testansatz, Live-Demo und Demo-Grenzen                         |
+| [Setup-Guide](docs/setup.md)                                        | Lokale Einrichtung, Env-Variablen, Convex Dashboard            |
 | [Mockups](https://www.figma.com/design/cMDLce6WDp4Me1Ia4mWEhd/Kumu) | Figma-Mockups                                                  |
