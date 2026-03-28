@@ -15,6 +15,7 @@ import {
 } from "./shared";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { getErrorMessage } from "~/lib/error-message";
 
 export function ProductForm({
   onClose,
@@ -144,8 +145,8 @@ export function ProductForm({
         await createProduct(payload);
       }
       onClose();
-    } catch (e: any) {
-      setError(e.message ?? "Something went wrong.");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Something went wrong."));
     } finally {
       setSaving(false);
     }

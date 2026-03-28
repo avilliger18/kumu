@@ -1,4 +1,8 @@
-import { convexAuthNextjsMiddleware, createRouteMatcher, isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
+import {
+  convexAuthNextjsMiddleware,
+  createRouteMatcher,
+  isAuthenticatedNextjs,
+} from "@convex-dev/auth/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in", "/verify"]);

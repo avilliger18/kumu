@@ -15,7 +15,6 @@ export const resolveProductByScan = query({
     batchCode: v.optional(v.string()),
   },
   handler: async (ctx, { barcode }) => {
-                          
     const barcodeNorm = normalizeBarcode(barcode);
     const codeEntry = await ctx.db
       .query("productCodes")
@@ -54,8 +53,6 @@ export const resolveProductByScan = query({
         };
       }
     }
-
-                                
 
     return {
       resolutionStatus: "found" as const,

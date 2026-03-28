@@ -11,6 +11,7 @@ import { Field, Sel, SupplyStep } from "../_components/shared";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { getErrorMessage } from "~/lib/error-message";
 
 const SEVERITY_STYLE = {
   low: {
@@ -86,8 +87,8 @@ function AlertsContent() {
       setChargeNumber("");
       setSeverity("medium");
       setShowForm(false);
-    } catch (e: any) {
-      setError(e.message ?? "Something went wrong.");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Something went wrong."));
     } finally {
       setSaving(false);
     }
@@ -127,7 +128,6 @@ function AlertsContent() {
         </p>
       </div>
 
-      
       <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h4 className="text-lg font-semibold font-heading mb-2">
           Select product
@@ -151,7 +151,6 @@ function AlertsContent() {
 
       {selectedProductId && (
         <>
-          
           <div className="mb-4 flex flex-col gap-3">
             {alerts === undefined && (
               <p className="text-sm text-slate-400">Loading alerts…</p>
@@ -219,7 +218,6 @@ function AlertsContent() {
             })}
           </div>
 
-          
           {showForm ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <h4 className="text-lg font-semibold font-heading mb-2">

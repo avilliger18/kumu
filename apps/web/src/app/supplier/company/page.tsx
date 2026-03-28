@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Field } from "../_components/shared";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { getErrorMessage } from "~/lib/error-message";
 
 function OnboardingForm() {
   const becomeSupplier = useMutation(api.suppliers.becomeSupplier);
@@ -29,8 +30,8 @@ function OnboardingForm() {
         countryCode: countryCode || undefined,
         website: website || undefined,
       });
-    } catch (e: any) {
-      setError(e.message ?? "Something went wrong.");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Something went wrong."));
     } finally {
       setSaving(false);
     }
@@ -160,8 +161,8 @@ function EditCompanyForm({
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (e: any) {
-      setError(e.message ?? "Something went wrong.");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Something went wrong."));
     } finally {
       setSaving(false);
     }

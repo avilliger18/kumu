@@ -4,10 +4,8 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@kumu/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { BookOpen, ChevronRight, Settings, TriangleAlert } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import circleBubble from "../../../public/circle-bubble.png";
 
 function getInitials(name?: string | null, email?: string | null) {
   if (name) {

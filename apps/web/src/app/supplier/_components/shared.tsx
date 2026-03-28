@@ -1,5 +1,6 @@
 "use client";
 
+import type { GenericId } from "convex/values";
 import React from "react";
 import { X } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -48,7 +49,7 @@ export interface NutritionForm {
 }
 
 export type ExistingProduct = {
-  _id: any;
+  _id: GenericId<"products">;
   title: string;
   subtitle?: string;
   category?: string;

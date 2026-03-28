@@ -24,7 +24,10 @@ export default function TabLayout() {
     name: "chats" as const,
     options: {
       title: "Chats",
-      icon: { sf: "bubble.left.and.bubble.right.fill", drawable: "chat" } as const,
+      icon: {
+        sf: "bubble.left.and.bubble.right.fill",
+        drawable: "chat",
+      } as const,
     },
     ...(Platform.OS === "ios" ? { disableAutomaticContentInsets: true } : {}),
   };

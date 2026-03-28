@@ -10,7 +10,30 @@
   "author": "",
   "license": "ISC",
   "exports": {
-    "./convex/_generated/api": "./convex/_generated/api.js"
+    "./convex/_generated/api": {
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
+    },
+    "./convex/_generated/dataModel": {
+      "types": "./convex/_generated/dataModel.d.ts"
+    },
+    "./convex/_generated/server": {
+      "types": "./convex/_generated/server.d.ts",
+      "default": "./convex/_generated/server.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "convex/_generated/api": [
+        "./convex/_generated/api.d.ts"
+      ],
+      "convex/_generated/dataModel": [
+        "./convex/_generated/dataModel.d.ts"
+      ],
+      "convex/_generated/server": [
+        "./convex/_generated/server.d.ts"
+      ]
+    }
   },
   "dependencies": {
     "@auth/core": "0.37.0",

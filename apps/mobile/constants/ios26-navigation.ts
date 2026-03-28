@@ -8,12 +8,13 @@ export const ios26ModalOptions: NativeStackNavigationOptions = {
   presentation: "modal",
 };
 
-export const ios26ScrollEdgeEffects: NativeStackNavigationOptions["scrollEdgeEffects"] = isIOS
-  ? {
-      top: "automatic",
-      bottom: "automatic",
-    }
-  : undefined;
+export const ios26ScrollEdgeEffects: NativeStackNavigationOptions["scrollEdgeEffects"] =
+  isIOS
+    ? {
+        top: "automatic",
+        bottom: "automatic",
+      }
+    : undefined;
 
 export const ios26LargeTitleScreenOptions: Pick<
   NativeStackNavigationOptions,

@@ -1,15 +1,12 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-                                                                                  
 async function requireUser(ctx: any) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Not authenticated");
   return identity.tokenIdentifier as string;
 }
 
-                                                                                  
-                                                                  
 export const createSession = mutation({
   args: {
     title: v.string(),
@@ -58,7 +55,12 @@ export const addMessage = mutation({
     }
 
     const now = Date.now();
-    await ctx.db.insert("chatMessages", { sessionId, role, text, createdAt: now });
+    await ctx.db.insert("chatMessages", {
+      sessionId,
+      role,
+      text,
+      createdAt: now,
+    });
     await ctx.db.patch(sessionId, { updatedAt: now });
   },
 });
@@ -72,7 +74,9 @@ export const getUserSessions = query({
 
     const sessions = await ctx.db
       .query("chatSessions")
-      .withIndex("by_user_updatedAt", (q) => q.eq("userTokenIdentifier", userTokenIdentifier))
+      .withIndex("by_user_updatedAt", (q) =>
+        q.eq("userTokenIdentifier", userTokenIdentifier),
+      )
       .order("desc")
       .take(50);
 
@@ -102,7 +106,8 @@ export const getSession = query({
     const userTokenIdentifier = await requireUser(ctx);
 
     const session = await ctx.db.get(sessionId);
-    if (!session || session.userTokenIdentifier !== userTokenIdentifier) return null;
+    if (!session || session.userTokenIdentifier !== userTokenIdentifier)
+      return null;
 
     const messages = await ctx.db
       .query("chatMessages")

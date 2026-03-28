@@ -29,7 +29,12 @@ function AiMessage({ text }: { text: string }) {
   return (
     <View style={s.aiRow}>
       <View style={s.aiAvatar}>
-        <SymbolView name="sparkle" style={s.aiAvatarIcon} tintColor="#fff" type="hierarchical" />
+        <SymbolView
+          name="sparkle"
+          style={s.aiAvatarIcon}
+          tintColor="#fff"
+          type="hierarchical"
+        />
       </View>
       <View style={s.aiBubble}>
         <Text style={s.aiBubbleText}>{text}</Text>
@@ -56,7 +61,10 @@ export default function ChatScreen() {
   const [showSuggestions, setShowSuggestions] = useState(true);
 
   const sessionId = id as Id<"chatSessions">;
-  const session = useQuery(api.chats.getSession, sessionId ? { sessionId } : "skip");
+  const session = useQuery(
+    api.chats.getSession,
+    sessionId ? { sessionId } : "skip",
+  );
   const addMessage = useMutation(api.chats.addMessage);
 
   const messages = session?.messages ?? [];
@@ -70,7 +78,6 @@ export default function ChatScreen() {
 
     await addMessage({ sessionId, role: "user", text: trimmed });
 
-                           
     setTimeout(async () => {
       await addMessage({
         sessionId,
@@ -97,13 +104,17 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         style={s.root}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={88}>
+        keyboardVerticalOffset={88}
+      >
         <ScrollView
           ref={scrollRef}
           style={s.messages}
           contentContainerStyle={s.messagesContent}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
+          onContentSizeChange={() =>
+            scrollRef.current?.scrollToEnd({ animated: false })
+          }
+        >
           {messages.map((m) =>
             m.role === "ai" ? (
               <AiMessage key={m._id} text={m.text} />
@@ -118,7 +129,8 @@ export default function ChatScreen() {
                 <Pressable
                   key={sug}
                   onPress={() => send(sug)}
-                  style={({ pressed }) => [s.chip, pressed && s.chipPressed]}>
+                  style={({ pressed }) => [s.chip, pressed && s.chipPressed]}
+                >
                   <Text style={s.chipText}>{sug}</Text>
                 </Pressable>
               ))}
@@ -126,7 +138,12 @@ export default function ChatScreen() {
           ) : null}
         </ScrollView>
 
-        <View style={[s.inputBar, { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 }]}>
+        <View
+          style={[
+            s.inputBar,
+            { paddingBottom: insets.bottom > 0 ? insets.bottom : 16 },
+          ]}
+        >
           <TextInput
             style={s.input}
             placeholder="Ask about this product…"
@@ -145,8 +162,13 @@ export default function ChatScreen() {
               s.sendBtn,
               !input.trim() && s.sendBtnDisabled,
               pressed && input.trim() ? { opacity: 0.75 } : null,
-            ]}>
-            <SymbolView name="arrow.up" style={s.sendBtnIcon} tintColor="#fff" />
+            ]}
+          >
+            <SymbolView
+              name="arrow.up"
+              style={s.sendBtnIcon}
+              tintColor="#fff"
+            />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -184,7 +206,11 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  aiBubbleText: { color: ios26Colors.textPrimary, fontSize: 15, lineHeight: 22 },
+  aiBubbleText: {
+    color: ios26Colors.textPrimary,
+    fontSize: 15,
+    lineHeight: 22,
+  },
 
   userRow: { alignItems: "flex-end" },
   userBubble: {

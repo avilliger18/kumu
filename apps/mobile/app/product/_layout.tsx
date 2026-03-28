@@ -10,7 +10,8 @@ export default function ProductLayout() {
     <Stack
       screenOptions={{
         scrollEdgeEffects: ios26ScrollEdgeEffects,
-      }}>
+      }}
+    >
       <Stack.Screen name="[barcode]" />
       <Stack.Screen
         name="production"

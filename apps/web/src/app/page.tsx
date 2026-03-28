@@ -11,6 +11,7 @@ import { api } from "@kumu/backend/convex/_generated/api";
 import { DropdownMenu } from "radix-ui";
 import { User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { GlobeMethods } from "react-globe.gl";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Card, CardContent } from "~/components/ui/card";
@@ -83,6 +84,24 @@ const STEP_EMOJI: Record<string, string> = {
   processing: "⚙️",
 };
 
+type SupplyArc = {
+  startLat: number;
+  startLng: number;
+  endLat: number;
+  endLng: number;
+};
+
+type SupplyPoint = {
+  type: string;
+  lat: number;
+  lng: number;
+  label: string;
+  location: string;
+  ingredient?: string | null;
+  emoji: string;
+  isSelected: boolean;
+};
+
 export default function SupplyChainGlobe() {
   const { signOut } = useAuthActions();
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
@@ -139,7 +158,7 @@ export default function SupplyChainGlobe() {
       : "skip",
   );
 
-  const globeRef = useRef<any>(null);
+  const globeRef = useRef<GlobeMethods | undefined>(undefined);
 
   const steps = useMemo(
     () => scanResult?.supplyChainSteps ?? [],
@@ -149,7 +168,7 @@ export default function SupplyChainGlobe() {
   // Build arc data: each origin step → the factory step
   const factoryStep = steps.find((s) => s.type === "factory");
   const distStep = steps.find((s) => s.type === "distribution");
-  const supplyArcs = useMemo(() => {
+  const supplyArcs = useMemo<SupplyArc[]>(() => {
     if (!factoryStep) return [];
     const origins = steps.filter(
       (s) => s.type !== "factory" && s.type !== "distribution",
@@ -173,7 +192,7 @@ export default function SupplyChainGlobe() {
 
   const footprint = useMemo(() => calcFootprint(steps), [steps]);
 
-  const supplyPoints = useMemo(
+  const supplyPoints = useMemo<SupplyPoint[]>(
     () =>
       steps.map((s, i) => ({
         ...s,
@@ -194,7 +213,7 @@ export default function SupplyChainGlobe() {
       { lat: centerLat, lng: centerLng, altitude: 2.2 },
       1800,
     );
-  }, [steps.length]);
+  }, [steps]);
 
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-slate-100 text-slate-900">
@@ -748,10 +767,10 @@ export default function SupplyChainGlobe() {
               backgroundColor="rgba(0,0,0,0)"
               // supply chain arcs
               arcsData={supplyArcs}
-              arcStartLat={(d: any) => d.startLat}
-              arcStartLng={(d: any) => d.startLng}
-              arcEndLat={(d: any) => d.endLat}
-              arcEndLng={(d: any) => d.endLng}
+              arcStartLat="startLat"
+              arcStartLng="startLng"
+              arcEndLat="endLat"
+              arcEndLng="endLng"
               arcColor={() => "#ff459f"}
               arcAltitude={0.2}
               arcStroke={0.8}
@@ -760,10 +779,11 @@ export default function SupplyChainGlobe() {
               arcDashAnimateTime={2200}
               // supply chain markers
               htmlElementsData={supplyPoints}
-              htmlLat={(d: any) => d.lat}
-              htmlLng={(d: any) => d.lng}
+              htmlLat="lat"
+              htmlLng="lng"
               htmlAltitude={0.01}
-              htmlElement={(d: any) => {
+              htmlElement={(datum) => {
+                const d = datum as SupplyPoint;
                 const el = document.createElement("div");
                 el.style.cssText = `
                   display: flex;

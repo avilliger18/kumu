@@ -2,22 +2,11 @@
 
 import { api } from "@kumu/backend/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
-import {
-  AlertTriangle,
-  Factory,
-  Package,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { Factory, Package, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { ProductForm } from "../_components/product-form";
-import {
-  calcFootprint,
-  ExistingProduct,
-  SupplyStep,
-} from "../_components/shared";
+import { ExistingProduct } from "../_components/shared";
 import { Button } from "~/components/ui/button";
 
 export default function ProductsPage() {
@@ -30,7 +19,6 @@ export default function ProductsPage() {
   );
   const [showForm, setShowForm] = useState(false);
 
-                                                        
   if (producer === null) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-16 text-center">
@@ -56,7 +44,6 @@ export default function ProductsPage() {
     return <div className="p-8 text-sm text-slate-400">Loading…</div>;
   }
 
-                          
   if (showForm || editingProduct) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-8">
@@ -96,9 +83,6 @@ export default function ProductsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {products.map((p) => {
-            const fp = calcFootprint(
-              (p.supplyChainSteps ?? []) as SupplyStep[],
-            );
             return (
               <div
                 key={p._id}

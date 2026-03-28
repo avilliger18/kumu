@@ -21,7 +21,8 @@ function Row({ label, onPress, destructive, last }: RowProps) {
     <>
       <Pressable
         onPress={onPress}
-        style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
+        style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+      >
         <Text style={[styles.rowLabel, destructive && styles.rowDestructive]}>
           {label}
         </Text>
@@ -67,7 +68,8 @@ export default function ProfileModal() {
         ]}
         showsVerticalScrollIndicator={false}
         bounces
-        alwaysBounceVertical>
+        alwaysBounceVertical
+      >
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>AS</Text>
@@ -99,7 +101,8 @@ export default function ProfileModal() {
         </Group>
 
         <Text style={styles.footer}>
-          Your scan data is stored securely and never shared without your consent.
+          Your scan data is stored securely and never shared without your
+          consent.
         </Text>
       </ScrollView>
     </>

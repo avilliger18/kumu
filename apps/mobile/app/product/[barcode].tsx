@@ -40,7 +40,13 @@ function SectionHeader({ title }: { title: string }) {
   return <Text style={s.sectionHeader}>{title}</Text>;
 }
 
-function Card({ children, style }: { children: React.ReactNode; style?: object }) {
+function Card({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: object;
+}) {
   return <View style={[s.card, style]}>{children}</View>;
 }
 
@@ -87,20 +93,25 @@ function ScorePill({
   fg?: string;
 }) {
   const subColor = fg === "#fff" ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.6)";
-  const noteColor = fg === "#fff" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.5)";
+  const noteColor =
+    fg === "#fff" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.5)";
 
   return (
     <View style={[s.scorePill, { backgroundColor: bg }]}>
       <Text style={[s.scoreLetter, { color: fg }]}>{letter}</Text>
       <Text style={[s.scoreLabel, { color: subColor }]}>{label}</Text>
-      {note ? <Text style={[s.scoreNote, { color: noteColor }]}>{note}</Text> : null}
+      {note ? (
+        <Text style={[s.scoreNote, { color: noteColor }]}>{note}</Text>
+      ) : null}
     </View>
   );
 }
 
 export default function ProductSheet() {
   const params = useLocalSearchParams<{ barcode: string; source?: string }>();
-  const barcode = params.barcode ? decodeURIComponent(String(params.barcode)) : "";
+  const barcode = params.barcode
+    ? decodeURIComponent(String(params.barcode))
+    : "";
   const source = params.source;
   const insets = useSafeAreaInsets();
   const recordScan = useMutation(api.products.recordScan);
@@ -113,10 +124,17 @@ export default function ProductSheet() {
   ) as any;
 
   const isResolvedProduct = result && result.resolutionStatus !== "not_found";
-  const productTitle = isResolvedProduct ? result.product?.title ?? "Product" : "Product";
+  const productTitle = isResolvedProduct
+    ? (result.product?.title ?? "Product")
+    : "Product";
 
   useEffect(() => {
-    if (!barcode || !result || source !== "scan" || recorded.current === barcode) {
+    if (
+      !barcode ||
+      !result ||
+      source !== "scan" ||
+      recorded.current === barcode
+    ) {
       return;
     }
 
@@ -156,8 +174,14 @@ export default function ProductSheet() {
             <Pressable
               onPress={() => router.back()}
               hitSlop={12}
-              style={({ pressed }) => [pressed && s.headerActionPressed]}>
-              <Text style={[s.headerAction, tintColor ? { color: tintColor } : null]}>
+              style={({ pressed }) => [pressed && s.headerActionPressed]}
+            >
+              <Text
+                style={[
+                  s.headerAction,
+                  tintColor ? { color: tintColor } : null,
+                ]}
+              >
                 Close
               </Text>
             </Pressable>
@@ -192,7 +216,8 @@ export default function ProductSheet() {
           <Text style={s.nfSub}>{barcode}</Text>
           <Pressable
             onPress={() => router.back()}
-            style={({ pressed }) => [s.nfBtn, pressed && { opacity: 0.72 }]}>
+            style={({ pressed }) => [s.nfBtn, pressed && { opacity: 0.72 }]}
+          >
             <Text style={s.nfBtnText}>Go back</Text>
           </Pressable>
         </View>
@@ -212,278 +237,310 @@ export default function ProductSheet() {
     <>
       <Stack.Screen options={screenOptions} />
       <View style={s.wrapper}>
-      <ScrollView
-        style={s.root}
-        contentInsetAdjustmentBehavior="automatic"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}>
-        <View style={s.heroCard}>
-          <View style={s.heroImageArea}>
-            {product.thumbnailUrl ? (
-              <Image
-                source={{ uri: product.thumbnailUrl }}
-                style={s.heroImage}
-                contentFit="contain"
-              />
-            ) : (
-              <SymbolView
-                name="photo"
-                style={s.heroPlaceholderIcon}
-                tintColor={ios26Colors.surfaceHigh}
-              />
-            )}
+        <ScrollView
+          style={s.root}
+          contentInsetAdjustmentBehavior="automatic"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+        >
+          <View style={s.heroCard}>
+            <View style={s.heroImageArea}>
+              {product.thumbnailUrl ? (
+                <Image
+                  source={{ uri: product.thumbnailUrl }}
+                  style={s.heroImage}
+                  contentFit="contain"
+                />
+              ) : (
+                <SymbolView
+                  name="photo"
+                  style={s.heroPlaceholderIcon}
+                  tintColor={ios26Colors.surfaceHigh}
+                />
+              )}
 
-            {qs.nutriScore ? (
-              <View
-                style={[
-                  s.nutriBadge,
-                  {
-                    backgroundColor:
-                      NUTRI[qs.nutriScore]?.bg ?? ios26Colors.surfaceElevated,
-                  },
-                ]}>
-                <Text
+              {qs.nutriScore ? (
+                <View
                   style={[
-                    s.nutriBadgeLetter,
-                    { color: NUTRI[qs.nutriScore]?.fg ?? "#fff" },
-                  ]}>
-                  {qs.nutriScore}
-                </Text>
-                <Text
-                  style={[
-                    s.nutriBadgeLabel,
+                    s.nutriBadge,
                     {
-                      color:
-                        NUTRI[qs.nutriScore]?.fg === "#000"
-                          ? "rgba(0,0,0,0.55)"
-                          : "rgba(255,255,255,0.7)",
+                      backgroundColor:
+                        NUTRI[qs.nutriScore]?.bg ?? ios26Colors.surfaceElevated,
                     },
-                  ]}>
-                  {"Nutri\nScore"}
+                  ]}
+                >
+                  <Text
+                    style={[
+                      s.nutriBadgeLetter,
+                      { color: NUTRI[qs.nutriScore]?.fg ?? "#fff" },
+                    ]}
+                  >
+                    {qs.nutriScore}
+                  </Text>
+                  <Text
+                    style={[
+                      s.nutriBadgeLabel,
+                      {
+                        color:
+                          NUTRI[qs.nutriScore]?.fg === "#000"
+                            ? "rgba(0,0,0,0.55)"
+                            : "rgba(255,255,255,0.7)",
+                      },
+                    ]}
+                  >
+                    {"Nutri\nScore"}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={s.heroText}>
+              <Text style={s.heroTitle} numberOfLines={2}>
+                {product.title}
+              </Text>
+              {product.subtitle ? (
+                <Text style={s.heroSubtitle}>{product.subtitle}</Text>
+              ) : null}
+              <View style={s.heroBrandRow}>
+                <Text style={s.heroBrand}>
+                  {producer?.displayName ?? "Unknown"}
                 </Text>
+                {product.category ? (
+                  <>
+                    <Text style={s.heroDot}>/</Text>
+                    <Text style={s.heroCategory}>{product.category}</Text>
+                  </>
+                ) : null}
+              </View>
+              <Text style={s.heroBarcode}>{barcode}</Text>
+            </View>
+
+            {qs.novaGroup || qs.overallFoodScore !== undefined ? (
+              <View style={s.scoreStrip}>
+                {qs.novaGroup ? (
+                  <ScorePill
+                    letter={String(qs.novaGroup)}
+                    label="NOVA"
+                    note={qs.processingLevel}
+                    bg={NOVA_COLOR[qs.novaGroup] ?? ios26Colors.surfaceElevated}
+                  />
+                ) : null}
+                {qs.overallFoodScore !== undefined ? (
+                  <ScorePill
+                    letter={String(qs.overallFoodScore)}
+                    label="Food score"
+                    bg={ios26Colors.surfaceElevated}
+                  />
+                ) : null}
               </View>
             ) : null}
           </View>
 
-          <View style={s.heroText}>
-            <Text style={s.heroTitle} numberOfLines={2}>
-              {product.title}
-            </Text>
-            {product.subtitle ? (
-              <Text style={s.heroSubtitle}>{product.subtitle}</Text>
-            ) : null}
-            <View style={s.heroBrandRow}>
-              <Text style={s.heroBrand}>{producer?.displayName ?? "Unknown"}</Text>
-              {product.category ? (
-                <>
-                  <Text style={s.heroDot}>/</Text>
-                  <Text style={s.heroCategory}>{product.category}</Text>
-                </>
-              ) : null}
-            </View>
-            <Text style={s.heroBarcode}>{barcode}</Text>
-          </View>
-
-          {qs.novaGroup || qs.overallFoodScore !== undefined ? (
-            <View style={s.scoreStrip}>
-              {qs.novaGroup ? (
-                <ScorePill
-                  letter={String(qs.novaGroup)}
-                  label="NOVA"
-                  note={qs.processingLevel}
-                  bg={NOVA_COLOR[qs.novaGroup] ?? ios26Colors.surfaceElevated}
-                />
-              ) : null}
-              {qs.overallFoodScore !== undefined ? (
-                <ScorePill
-                  letter={String(qs.overallFoodScore)}
-                  label="Food score"
-                  bg={ios26Colors.surfaceElevated}
-                />
-              ) : null}
+          {product.ingredientsText ? (
+            <View style={s.section}>
+              <SectionHeader title="Ingredients" />
+              <Card>
+                <Text style={s.ingredientsText}>{product.ingredientsText}</Text>
+              </Card>
             </View>
           ) : null}
-        </View>
 
-        {product.ingredientsText ? (
           <View style={s.section}>
-            <SectionHeader title="Ingredients" />
-            <Card>
-              <Text style={s.ingredientsText}>{product.ingredientsText}</Text>
-            </Card>
-          </View>
-        ) : null}
-
-        <View style={s.section}>
-          <SectionHeader
-            title={`Nutritional values - per ${product.nutrition?.referenceBasis ?? "100g"}`}
-          />
-          <Card style={s.cardNoPad}>
-            <NutrientRow label="Energy" value={nutrition.energyKcal} unit="kcal" bold />
-            <NutrientRow label="Fat" value={nutrition.fat} bold />
-            <NutrientRow label="of which saturates" value={nutrition.saturatedFat} sub />
-            <NutrientRow label="Carbohydrates" value={nutrition.carbs} bold />
-            <NutrientRow label="of which sugars" value={nutrition.sugars} sub />
-            <NutrientRow label="Fibre" value={nutrition.fiber} />
-            <NutrientRow label="Protein" value={nutrition.protein} bold />
-            <NutrientRow label="Salt" value={nutrition.salt} />
-            {nutrition.calcium !== undefined ? (
-              <NutrientRow label="Calcium" value={nutrition.calcium} unit="mg" />
-            ) : null}
-            {nutrition.iron !== undefined ? (
-              <NutrientRow label="Iron" value={nutrition.iron} unit="mg" />
-            ) : null}
-            {nutrition.magnesium !== undefined ? (
-              <NutrientRow
-                label="Magnesium"
-                value={nutrition.magnesium}
-                unit="mg"
-                last
-              />
-            ) : !nutrition.iron && !nutrition.calcium ? (
-              <NutrientRow label="Salt" value={nutrition.salt} last />
-            ) : null}
-          </Card>
-        </View>
-
-        {product.additives?.length > 0 ? (
-          <View style={s.section}>
-            <SectionHeader title="Additives" />
-            <Card style={s.cardNoPad}>
-              {product.additives.map((additive: any, index: number) => (
-                <View
-                  key={additive.code}
-                  style={[
-                    s.additiveRow,
-                    index < product.additives.length - 1 && s.additiveBorder,
-                  ]}>
-                  <Text style={s.additiveCode}>{additive.code}</Text>
-                  <Text style={s.additiveName} numberOfLines={1}>
-                    {additive.name ?? additive.code}
-                  </Text>
-                  <View
-                    style={[
-                      s.riskChip,
-                      additive.riskLevel === "low" && s.riskLow,
-                      additive.riskLevel === "moderate" && s.riskMid,
-                      additive.riskLevel === "high" && s.riskHigh,
-                    ]}>
-                    <Text style={s.riskChipText}>{additive.riskLevel}</Text>
-                  </View>
-                </View>
-              ))}
-            </Card>
-          </View>
-        ) : null}
-
-        <View style={s.section}>
-          <SectionHeader title="Production" />
-          <Pressable
-            onPress={() => router.push("/product/production")}
-            style={({ pressed }) => [s.card, s.productionRow, pressed && s.productionRowPressed]}>
-            <SymbolView
-              name="globe.europe.africa.fill"
-              style={s.productionIcon}
-              tintColor={ios26Colors.textMuted}
-              type="hierarchical"
+            <SectionHeader
+              title={`Nutritional values - per ${product.nutrition?.referenceBasis ?? "100g"}`}
             />
-            <View style={s.productionText}>
-              <Text style={s.productionTitle}>Supply chain</Text>
-              <Text style={s.productionSub}>Origin, manufacturing & logistics</Text>
-            </View>
-            <Text style={s.productionChevron}>{">"}</Text>
-          </Pressable>
-        </View>
-
-        <View style={s.section}>
-          <SectionHeader title="Ecological Footprint" />
-          <Card>
-            <Text style={s.co2Label}>Distance traveled</Text>
-            <Text style={s.co2Value}>
-              {co2Distance} <Text style={s.co2Unit}>km</Text>
-            </Text>
-            <View style={s.co2Bar}>
-              <View style={s.co2BarFill} />
-            </View>
-          </Card>
-        </View>
-
-        <View style={s.section}>
-          <SectionHeader title="Producer" />
-          <Card style={s.producerCard}>
-            <View style={s.producerLeft}>
-              <Text style={s.producerName}>{producer?.displayName}</Text>
-              {producer?.name && producer.name !== producer.displayName ? (
-                <Text style={s.producerLegal}>{producer.name}</Text>
+            <Card style={s.cardNoPad}>
+              <NutrientRow
+                label="Energy"
+                value={nutrition.energyKcal}
+                unit="kcal"
+                bold
+              />
+              <NutrientRow label="Fat" value={nutrition.fat} bold />
+              <NutrientRow
+                label="of which saturates"
+                value={nutrition.saturatedFat}
+                sub
+              />
+              <NutrientRow label="Carbohydrates" value={nutrition.carbs} bold />
+              <NutrientRow
+                label="of which sugars"
+                value={nutrition.sugars}
+                sub
+              />
+              <NutrientRow label="Fibre" value={nutrition.fiber} />
+              <NutrientRow label="Protein" value={nutrition.protein} bold />
+              <NutrientRow label="Salt" value={nutrition.salt} />
+              {nutrition.calcium !== undefined ? (
+                <NutrientRow
+                  label="Calcium"
+                  value={nutrition.calcium}
+                  unit="mg"
+                />
               ) : null}
-              {producer?.countryCode ? (
-                <Text style={s.producerCountry}>{producer.countryCode}</Text>
+              {nutrition.iron !== undefined ? (
+                <NutrientRow label="Iron" value={nutrition.iron} unit="mg" />
               ) : null}
+              {nutrition.magnesium !== undefined ? (
+                <NutrientRow
+                  label="Magnesium"
+                  value={nutrition.magnesium}
+                  unit="mg"
+                  last
+                />
+              ) : !nutrition.iron && !nutrition.calcium ? (
+                <NutrientRow label="Salt" value={nutrition.salt} last />
+              ) : null}
+            </Card>
+          </View>
+
+          {product.additives?.length > 0 ? (
+            <View style={s.section}>
+              <SectionHeader title="Additives" />
+              <Card style={s.cardNoPad}>
+                {product.additives.map((additive: any, index: number) => (
+                  <View
+                    key={additive.code}
+                    style={[
+                      s.additiveRow,
+                      index < product.additives.length - 1 && s.additiveBorder,
+                    ]}
+                  >
+                    <Text style={s.additiveCode}>{additive.code}</Text>
+                    <Text style={s.additiveName} numberOfLines={1}>
+                      {additive.name ?? additive.code}
+                    </Text>
+                    <View
+                      style={[
+                        s.riskChip,
+                        additive.riskLevel === "low" && s.riskLow,
+                        additive.riskLevel === "moderate" && s.riskMid,
+                        additive.riskLevel === "high" && s.riskHigh,
+                      ]}
+                    >
+                      <Text style={s.riskChipText}>{additive.riskLevel}</Text>
+                    </View>
+                  </View>
+                ))}
+              </Card>
             </View>
-            {producer?.verificationStatus === "verified" ? (
+          ) : null}
+
+          <View style={s.section}>
+            <SectionHeader title="Production" />
+            <Pressable
+              onPress={() => router.push("/product/production")}
+              style={({ pressed }) => [
+                s.card,
+                s.productionRow,
+                pressed && s.productionRowPressed,
+              ]}
+            >
               <SymbolView
-                name="checkmark.seal.fill"
-                style={s.verifiedIcon}
-                tintColor={ios26Colors.success}
+                name="globe.europe.africa.fill"
+                style={s.productionIcon}
+                tintColor={ios26Colors.textMuted}
                 type="hierarchical"
               />
-            ) : null}
-          </Card>
-        </View>
-
-        {batch ? (
-          <View style={s.section}>
-            <SectionHeader title="Batch traceability" />
-            <View style={s.batchGrid}>
-              <View style={s.batchCell}>
-                <Text style={s.batchKey}>Lot code</Text>
-                <Text style={s.batchVal}>{batch.batchCodeRaw}</Text>
+              <View style={s.productionText}>
+                <Text style={s.productionTitle}>Supply chain</Text>
+                <Text style={s.productionSub}>
+                  Origin, manufacturing & logistics
+                </Text>
               </View>
-              {batch.originCountry ? (
-                <View style={s.batchCell}>
-                  <Text style={s.batchKey}>Origin</Text>
-                  <Text style={s.batchVal}>{batch.originCountry}</Text>
-                </View>
-              ) : null}
-              {batch.manufacturedAt ? (
-                <View style={s.batchCell}>
-                  <Text style={s.batchKey}>Manufactured</Text>
-                  <Text style={s.batchVal}>
-                    {new Date(batch.manufacturedAt).toLocaleDateString()}
-                  </Text>
-                </View>
-              ) : null}
-              {batch.bestBeforeAt ? (
-                <View style={s.batchCell}>
-                  <Text style={s.batchKey}>Best before</Text>
-                  <Text style={s.batchVal}>
-                    {new Date(batch.bestBeforeAt).toLocaleDateString()}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
+              <Text style={s.productionChevron}>{">"}</Text>
+            </Pressable>
           </View>
-        ) : null}
-      </ScrollView>
 
-      {/* Floating AI button — bottom right */}
-      <Pressable
-        onPress={async () => {
-          const id = await createChatSession({
-            title: product.title ?? barcode,
-            productBarcode: barcode,
-          });
-          router.push(`/chat?id=${id}`);
-        }}
-        style={({ pressed }) => [s.aiFab, pressed && s.aiFabPressed]}>
-        <SymbolView
-          name="sparkle"
-          style={s.aiFabIcon}
-          tintColor="#fff"
-          type="hierarchical"
-        />
-      </Pressable>
+          <View style={s.section}>
+            <SectionHeader title="Ecological Footprint" />
+            <Card>
+              <Text style={s.co2Label}>Distance traveled</Text>
+              <Text style={s.co2Value}>
+                {co2Distance} <Text style={s.co2Unit}>km</Text>
+              </Text>
+              <View style={s.co2Bar}>
+                <View style={s.co2BarFill} />
+              </View>
+            </Card>
+          </View>
 
+          <View style={s.section}>
+            <SectionHeader title="Producer" />
+            <Card style={s.producerCard}>
+              <View style={s.producerLeft}>
+                <Text style={s.producerName}>{producer?.displayName}</Text>
+                {producer?.name && producer.name !== producer.displayName ? (
+                  <Text style={s.producerLegal}>{producer.name}</Text>
+                ) : null}
+                {producer?.countryCode ? (
+                  <Text style={s.producerCountry}>{producer.countryCode}</Text>
+                ) : null}
+              </View>
+              {producer?.verificationStatus === "verified" ? (
+                <SymbolView
+                  name="checkmark.seal.fill"
+                  style={s.verifiedIcon}
+                  tintColor={ios26Colors.success}
+                  type="hierarchical"
+                />
+              ) : null}
+            </Card>
+          </View>
+
+          {batch ? (
+            <View style={s.section}>
+              <SectionHeader title="Batch traceability" />
+              <View style={s.batchGrid}>
+                <View style={s.batchCell}>
+                  <Text style={s.batchKey}>Lot code</Text>
+                  <Text style={s.batchVal}>{batch.batchCodeRaw}</Text>
+                </View>
+                {batch.originCountry ? (
+                  <View style={s.batchCell}>
+                    <Text style={s.batchKey}>Origin</Text>
+                    <Text style={s.batchVal}>{batch.originCountry}</Text>
+                  </View>
+                ) : null}
+                {batch.manufacturedAt ? (
+                  <View style={s.batchCell}>
+                    <Text style={s.batchKey}>Manufactured</Text>
+                    <Text style={s.batchVal}>
+                      {new Date(batch.manufacturedAt).toLocaleDateString()}
+                    </Text>
+                  </View>
+                ) : null}
+                {batch.bestBeforeAt ? (
+                  <View style={s.batchCell}>
+                    <Text style={s.batchKey}>Best before</Text>
+                    <Text style={s.batchVal}>
+                      {new Date(batch.bestBeforeAt).toLocaleDateString()}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
+        </ScrollView>
+
+        {/* Floating AI button — bottom right */}
+        <Pressable
+          onPress={async () => {
+            const id = await createChatSession({
+              title: product.title ?? barcode,
+              productBarcode: barcode,
+            });
+            router.push(`/chat?id=${id}`);
+          }}
+          style={({ pressed }) => [s.aiFab, pressed && s.aiFabPressed]}
+        >
+          <SymbolView
+            name="sparkle"
+            style={s.aiFabIcon}
+            tintColor="#fff"
+            type="hierarchical"
+          />
+        </Pressable>
       </View>
     </>
   );

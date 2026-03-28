@@ -31,25 +31,19 @@ export default function ScanScreen() {
         params: { barcode: data, source: "scan" },
       });
     } catch {
-                                        
       scanning.current = false;
       return;
     }
 
-                                                                              
-                                                                       
-                                                               
     setTimeout(() => {
       scanning.current = false;
     }, 2000);
   };
 
-                                                                              
   if (!permission) {
     return <View style={styles.root} />;
   }
 
-                                                                               
   if (!permission.granted) {
     return (
       <SafeAreaView style={[styles.root, styles.center]} edges={["top"]}>
@@ -72,7 +66,8 @@ export default function ScanScreen() {
             style={({ pressed }) => [
               styles.permissionBtn,
               pressed && { opacity: 0.72 },
-            ]}>
+            ]}
+          >
             <Text style={styles.permissionBtnText}>Allow Camera</Text>
           </Pressable>
         </View>
@@ -80,7 +75,6 @@ export default function ScanScreen() {
     );
   }
 
-                                                                               
   return (
     <View style={styles.root}>
       {cameraActive && (
@@ -89,17 +83,22 @@ export default function ScanScreen() {
           facing="back"
           onBarcodeScanned={handleScan}
           barcodeScannerSettings={{
-            barcodeTypes: ["ean13", "ean8", "upc_a", "upc_e", "qr", "code128", "code39"],
+            barcodeTypes: [
+              "ean13",
+              "ean8",
+              "upc_a",
+              "upc_e",
+              "qr",
+              "code128",
+              "code39",
+            ],
           }}
         />
       )}
 
-      
       <View pointerEvents="none" style={styles.overlay} />
 
-      
       <View pointerEvents="none" style={styles.ui}>
-        
         <SafeAreaView edges={["top"]}>
           <View style={styles.topArea}>
             <Text style={styles.screenTitle}>Scan</Text>
@@ -107,7 +106,6 @@ export default function ScanScreen() {
           </View>
         </SafeAreaView>
 
-        
         <View style={styles.finderWrap}>
           <View style={styles.finder}>
             <View style={[styles.corner, styles.cTL]} />
@@ -139,7 +137,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-                                                                                
   permissionCard: {
     width: "100%",
     maxWidth: 360,
@@ -186,7 +183,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-                                                                                
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.38)",
@@ -212,7 +208,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-                                                                                
   finderWrap: {
     alignItems: "center",
     justifyContent: "center",
@@ -231,28 +226,37 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   cTL: {
-    top: 0, left: 0,
-    borderTopWidth: CORNER, borderLeftWidth: CORNER,
+    top: 0,
+    left: 0,
+    borderTopWidth: CORNER,
+    borderLeftWidth: CORNER,
     borderTopLeftRadius: CORNER_R,
   },
   cTR: {
-    top: 0, right: 0,
-    borderTopWidth: CORNER, borderRightWidth: CORNER,
+    top: 0,
+    right: 0,
+    borderTopWidth: CORNER,
+    borderRightWidth: CORNER,
     borderTopRightRadius: CORNER_R,
   },
   cBL: {
-    bottom: 0, left: 0,
-    borderBottomWidth: CORNER, borderLeftWidth: CORNER,
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: CORNER,
+    borderLeftWidth: CORNER,
     borderBottomLeftRadius: CORNER_R,
   },
   cBR: {
-    bottom: 0, right: 0,
-    borderBottomWidth: CORNER, borderRightWidth: CORNER,
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: CORNER,
+    borderRightWidth: CORNER,
     borderBottomRightRadius: CORNER_R,
   },
   scanLine: {
     position: "absolute",
-    left: 10, right: 10,
+    left: 10,
+    right: 10,
     height: 2,
     borderRadius: 2,
     backgroundColor: "rgba(255,255,255,0.80)",

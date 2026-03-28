@@ -35,23 +35,33 @@ export default function VerifyScreen() {
   }, []);
 
   useEffect(() => {
-    if (isComplete) handleVerify();
-  }, [code]);
-
-  async function handleVerify() {
     if (!isComplete || loading) return;
-    setError("");
-    setLoading(true);
-    try {
-      await signIn("console-otp", { email, code });
-    } catch {
-      setError("Invalid code. Please try again.");
-      setCode("");
-      inputRef.current?.focus();
-    } finally {
-      setLoading(false);
-    }
-  }
+
+    let cancelled = false;
+
+    const verify = async () => {
+      setError("");
+      setLoading(true);
+      try {
+        await signIn("console-otp", { email, code });
+      } catch {
+        if (cancelled) return;
+        setError("Invalid code. Please try again.");
+        setCode("");
+        inputRef.current?.focus();
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void verify();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [code, email, isComplete, loading, signIn]);
 
   async function handleResend() {
     if (resending) return;
@@ -71,7 +81,8 @@ export default function VerifyScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.inner}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.content}>
           <View style={styles.header}>
             <Pressable onPress={() => router.back()} style={styles.backButton}>
@@ -86,7 +97,6 @@ export default function VerifyScreen() {
           </View>
 
           <View style={styles.form}>
-            
             <TextInput
               ref={inputRef}
               value={code}
@@ -100,10 +110,10 @@ export default function VerifyScreen() {
               textContentType="oneTimeCode"
             />
 
-            
             <Pressable
               style={styles.codeRow}
-              onPress={() => inputRef.current?.focus()}>
+              onPress={() => inputRef.current?.focus()}
+            >
               {Array.from({ length: CODE_LENGTH }).map((_, i) => {
                 const char = code[i];
                 const isActive = code.length === i && !loading;
@@ -115,9 +125,13 @@ export default function VerifyScreen() {
                       isActive && styles.codeBoxActive,
                       char && styles.codeBoxFilled,
                       error ? styles.codeBoxError : null,
-                    ]}>
+                    ]}
+                  >
                     {loading && i === 0 ? (
-                      <ActivityIndicator color={ios26Colors.textMuted} size="small" />
+                      <ActivityIndicator
+                        color={ios26Colors.textMuted}
+                        size="small"
+                      />
                     ) : (
                       <Text style={styles.codeChar}>{char || ""}</Text>
                     )}
@@ -129,7 +143,7 @@ export default function VerifyScreen() {
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <View style={styles.resendRow}>
-              <Text style={styles.resendLabel}>Didn't get it? </Text>
+              <Text style={styles.resendLabel}>Didn&apos;t get it? </Text>
               <Pressable onPress={handleResend} disabled={resending}>
                 {resending ? (
                   <ActivityIndicator color={ios26Colors.accent} size="small" />

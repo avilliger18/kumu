@@ -16,7 +16,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const isPublic = PUBLIC_PATHS.includes(pathname);
     if (!isAuthenticated && !isPublic) router.replace("/sign-in");
     else if (isAuthenticated && isPublic) router.replace("/");
-  }, [isAuthenticated, isLoading, pathname]);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
   if (isLoading) {
     return (

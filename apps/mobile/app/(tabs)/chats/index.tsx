@@ -10,7 +10,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useMutation, useQuery } from "convex/react";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
@@ -33,7 +36,8 @@ function ChatRow({ session, last }: { session: any; last: boolean }) {
         styles.row,
         !last && styles.rowBorder,
         pressed && styles.rowPressed,
-      ]}>
+      ]}
+    >
       <View style={styles.rowAvatar}>
         <SymbolView
           name="sparkle"
@@ -85,7 +89,11 @@ export default function ChatsScreen() {
           <Pressable
             onPress={startNewChat}
             hitSlop={12}
-            style={({ pressed }) => [styles.composeBtn, pressed && { opacity: 0.65 }]}>
+            style={({ pressed }) => [
+              styles.composeBtn,
+              pressed && { opacity: 0.65 },
+            ]}
+          >
             <SymbolView
               name="square.and.pencil"
               style={styles.composeBtnIcon}
@@ -117,8 +125,12 @@ export default function ChatsScreen() {
 
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
-        showsVerticalScrollIndicator={false}>
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 48 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {filtered.length === 0 ? (
           <View style={styles.empty}>
             <View style={styles.emptyIconShell}>
@@ -138,8 +150,16 @@ export default function ChatsScreen() {
             {!query ? (
               <Pressable
                 onPress={startNewChat}
-                style={({ pressed }) => [styles.newChatBtn, pressed && { opacity: 0.8 }]}>
-                <SymbolView name="plus" style={styles.newChatBtnIcon} tintColor="#fff" />
+                style={({ pressed }) => [
+                  styles.newChatBtn,
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                <SymbolView
+                  name="plus"
+                  style={styles.newChatBtnIcon}
+                  tintColor="#fff"
+                />
                 <Text style={styles.newChatBtnText}>New chat</Text>
               </Pressable>
             ) : null}
@@ -191,7 +211,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchIcon: { width: 16, height: 16 },
-  searchInput: { flex: 1, color: ios26Colors.textPrimary, fontSize: 15, paddingVertical: 0 },
+  searchInput: {
+    flex: 1,
+    color: ios26Colors.textPrimary,
+    fontSize: 15,
+    paddingVertical: 0,
+  },
 
   scrollContent: { flexGrow: 1 },
 
@@ -229,7 +254,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  rowTitle: { fontSize: 15, fontWeight: "600", color: ios26Colors.textPrimary, flex: 1 },
+  rowTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: ios26Colors.textPrimary,
+    flex: 1,
+  },
   rowTs: { fontSize: 12, color: ios26Colors.textMuted, marginLeft: 8 },
   rowPreview: { fontSize: 13, color: ios26Colors.textMuted },
 
@@ -250,8 +280,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyIcon: { width: 36, height: 36 },
-  emptyTitle: { fontSize: 22, fontWeight: "700", color: ios26Colors.textPrimary, letterSpacing: -0.3 },
-  emptySub: { fontSize: 15, color: ios26Colors.textMuted, textAlign: "center", lineHeight: 22 },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: ios26Colors.textPrimary,
+    letterSpacing: -0.3,
+  },
+  emptySub: {
+    fontSize: 15,
+    color: ios26Colors.textMuted,
+    textAlign: "center",
+    lineHeight: 22,
+  },
   newChatBtn: {
     marginTop: 8,
     flexDirection: "row",

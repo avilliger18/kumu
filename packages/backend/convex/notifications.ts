@@ -6,7 +6,6 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 
-                                                                                     
 export const getAffectedUsers = internalQuery({
   args: {
     productId: v.id("products"),
@@ -40,7 +39,6 @@ export const getAffectedUsers = internalQuery({
   },
 });
 
-                                                                           
 export const getUserEmail = internalQuery({
   args: { userTokenIdentifier: v.string() },
   handler: async (ctx, args) => {
@@ -54,7 +52,6 @@ export const getUserEmail = internalQuery({
   },
 });
 
-                                                                       
 export const insertNotification = internalMutation({
   args: {
     userTokenIdentifier: v.string(),
@@ -81,7 +78,6 @@ export const insertNotification = internalMutation({
   },
 });
 
-                                                            
 export const fanOutAlertEmails = internalAction({
   args: {
     alertId: v.id("productAlerts"),
@@ -93,7 +89,6 @@ export const fanOutAlertEmails = internalAction({
   handler: async (ctx, args) => {
     const resendApiKey = process.env.RESEND_API_KEY;
 
-                              
     const affectedUsers = await ctx.runQuery(
       internal.notifications.getAffectedUsers,
       { productId: args.productId, chargeNumber: args.chargeNumber },

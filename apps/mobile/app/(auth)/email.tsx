@@ -45,12 +45,13 @@ export default function EmailScreen() {
       <KeyboardAvoidingView
         style={styles.inner}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={0}>
+        keyboardVerticalOffset={0}
+      >
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title}>What's your email?</Text>
+            <Text style={styles.title}>What&apos;s your email?</Text>
             <Text style={styles.subtitle}>
-              We'll send you a one-time code to sign in.
+              We&apos;ll send you a one-time code to sign in.
             </Text>
           </View>
 
@@ -82,7 +83,8 @@ export default function EmailScreen() {
                 (!isValid || loading) && styles.buttonDisabled,
               ]}
               onPress={handleContinue}
-              disabled={!isValid || loading}>
+              disabled={!isValid || loading}
+            >
               {loading ? (
                 <ActivityIndicator color={ios26Colors.surface} size="small" />
               ) : (
@@ -90,7 +92,8 @@ export default function EmailScreen() {
                   style={[
                     styles.buttonText,
                     (!isValid || loading) && styles.buttonTextDisabled,
-                  ]}>
+                  ]}
+                >
                   Continue
                 </Text>
               )}

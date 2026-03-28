@@ -12,7 +12,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
 
@@ -45,7 +48,8 @@ function ScanRow({ item, last }: { item: any; last: boolean }) {
         styles.row,
         !last && styles.rowBorder,
         pressed && canOpen && styles.rowPressed,
-      ]}>
+      ]}
+    >
       <View style={styles.thumb}>
         {item.productImageUrl ? (
           <Image
@@ -93,7 +97,9 @@ export default function OverviewScreen() {
     ? scans.filter(
         (scan: any) =>
           scan.productTitle?.toLowerCase().includes(query.toLowerCase()) ||
-          scan.producerDisplayName?.toLowerCase().includes(query.toLowerCase()) ||
+          scan.producerDisplayName
+            ?.toLowerCase()
+            .includes(query.toLowerCase()) ||
           scan.barcodeRaw?.includes(query),
       )
     : scans;
@@ -105,7 +111,8 @@ export default function OverviewScreen() {
           <Text style={styles.title}>Overview</Text>
           <Pressable
             onPress={() => router.push("/profile")}
-            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}>
+            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+          >
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>AS</Text>
             </View>
@@ -139,7 +146,8 @@ export default function OverviewScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + 48 },
-        ]}>
+        ]}
+      >
         {filtered.length === 0 ? (
           <View style={styles.empty}>
             <SymbolView

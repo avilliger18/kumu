@@ -7,6 +7,7 @@ import Image from "next/image";
 import circle from "../../../public/circle-bubble.png";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { getErrorMessage } from "~/lib/error-message";
 
 export default function SignInPage() {
   const { signIn } = useAuthActions();
@@ -31,8 +32,8 @@ export default function SignInPage() {
     try {
       await signIn("console-otp", { email });
       setStep("code");
-    } catch (e: any) {
-      setError(e?.message ?? "Failed to send code.");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Failed to send code."));
     } finally {
       setLoading(false);
     }
@@ -50,8 +51,8 @@ export default function SignInPage() {
     try {
       await signIn("console-otp", { email, code });
       router.push("/");
-    } catch (e: any) {
-      setError(e?.message ?? "Invalid code.");
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, "Invalid code."));
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,6 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      
       <Image
         src={circle}
         alt="bubble"
@@ -71,9 +71,8 @@ export default function SignInPage() {
         alt="bubble"
         className="absolute -bottom-32 -left-32 w-[420px] h-[420px] object-contain opacity-70 pointer-events-none select-none"
       />
-      
+
       <div className="w-full max-w-sm relative z-10">
-        
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold font-heading text-primary leading-snug">
             Track your food.
@@ -84,7 +83,6 @@ export default function SignInPage() {
 
         <p className="text-sm text-primary mb-4 font-medium">Sign into Kumu</p>
 
-        
         <div className="mb-4">
           <Input
             type="email"
@@ -97,7 +95,6 @@ export default function SignInPage() {
           />
         </div>
 
-        
         {step === "code" && (
           <div className="mb-4">
             <Input
@@ -112,10 +109,8 @@ export default function SignInPage() {
           </div>
         )}
 
-        
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-        
         <Button
           onClick={step === "email" ? handleSendOTP : handleVerifyOTP}
           disabled={loading}

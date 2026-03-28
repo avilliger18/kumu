@@ -1,0 +1,6 @@
+.convex
+.turbo
+apps/mobile/.expo
+apps/web/.next
+node_modules
+packages/backend/convex/_generated

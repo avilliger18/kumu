@@ -7,7 +7,8 @@ export default function ProductionScreen() {
     <ScrollView
       style={styles.root}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={styles.content}>
+      contentContainerStyle={styles.content}
+    >
       <Text style={styles.title}>Supply chain</Text>
       <Text style={styles.subtitle}>
         Origin, manufacturing steps, and logistics data will appear here.
