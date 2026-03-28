@@ -30,7 +30,7 @@ export default function SignInPage() {
     setError(null);
 
     try {
-      await signIn("console-otp", { email });
+      await signIn("resend-otp", { email });
       setStep("code");
     } catch (error: unknown) {
       setError(getErrorMessage(error, "Failed to send code."));
@@ -49,7 +49,7 @@ export default function SignInPage() {
     setError(null);
 
     try {
-      await signIn("console-otp", { email, code });
+      await signIn("resend-otp", { email, code });
       router.push("/");
     } catch (error: unknown) {
       setError(getErrorMessage(error, "Invalid code."));

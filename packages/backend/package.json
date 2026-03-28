@@ -39,7 +39,8 @@
     "@auth/core": "0.37.0",
     "@convex-dev/auth": "^0.0.91",
     "convex": "^1.29.3",
-    "openai": "^6.9.1"
+    "openai": "^6.9.1",
+    "resend": "^6.9.4"
   },
   "devDependencies": {
     "typescript": "5.9.3"
