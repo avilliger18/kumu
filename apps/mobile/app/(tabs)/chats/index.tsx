@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
 import {
@@ -11,85 +12,86 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
+import { createSession, useChatSessions, type ChatSession } from "@/stores/chats";
 
-// ── Placeholder conversation data ─────────────────────────────────────────────
-const MOCK_CHATS: { id: string; title: string; preview: string; ts: string }[] = [];
-
-// ── Compose button ─────────────────────────────────────────────────────────────
-function ComposeButton({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      hitSlop={12}
-      style={({ pressed }) => [styles.composeBtn, pressed && { opacity: 0.7 }]}>
-      <SymbolView
-        name="square.and.pencil"
-        style={styles.composeBtnIcon}
-        tintColor={ios26Colors.accent}
-        type="hierarchical"
-      />
-    </Pressable>
-  );
+function timeAgo(ms: number): string {
+  const diff = Date.now() - ms;
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
-// ── Chat row ───────────────────────────────────────────────────────────────────
-function ChatRow({
-  item,
-  last,
-}: {
-  item: (typeof MOCK_CHATS)[number];
-  last: boolean;
-}) {
+function ChatRow({ session, last }: { session: ChatSession; last: boolean }) {
+  const lastMsg = session.messages[session.messages.length - 1];
+  const preview = lastMsg?.text ?? "No messages yet";
+
   return (
     <Pressable
+      onPress={() => router.push(`/chat?id=${session.id}`)}
       style={({ pressed }) => [
-        styles.chatRow,
-        !last && styles.chatRowBorder,
-        pressed && styles.chatRowPressed,
+        styles.row,
+        !last && styles.rowBorder,
+        pressed && styles.rowPressed,
       ]}>
-      <View style={styles.chatAvatar}>
+      <View style={styles.rowAvatar}>
         <SymbolView
           name="sparkle"
-          style={styles.chatAvatarIcon}
+          style={styles.rowAvatarIcon}
           tintColor="#fff"
           type="hierarchical"
         />
       </View>
-      <View style={styles.chatBody}>
-        <View style={styles.chatMeta}>
-          <Text style={styles.chatTitle} numberOfLines={1}>
-            {item.title}
+      <View style={styles.rowBody}>
+        <View style={styles.rowMeta}>
+          <Text style={styles.rowTitle} numberOfLines={1}>
+            {session.title}
           </Text>
-          <Text style={styles.chatTs}>{item.ts}</Text>
+          <Text style={styles.rowTs}>{timeAgo(session.updatedAt)}</Text>
         </View>
-        <Text style={styles.chatPreview} numberOfLines={1}>
-          {item.preview}
+        <Text style={styles.rowPreview} numberOfLines={1}>
+          {preview}
         </Text>
       </View>
     </Pressable>
   );
 }
 
-// ── Main screen ────────────────────────────────────────────────────────────────
 export default function ChatsScreen() {
   const insets = useSafeAreaInsets();
+  const sessions = useChatSessions();
   const [query, setQuery] = useState("");
 
   const filtered = query.trim()
-    ? MOCK_CHATS.filter(
-        (c) =>
-          c.title.toLowerCase().includes(query.toLowerCase()) ||
-          c.preview.toLowerCase().includes(query.toLowerCase()),
+    ? sessions.filter(
+        (s) =>
+          s.title.toLowerCase().includes(query.toLowerCase()) ||
+          s.messages.some((m) => m.text.toLowerCase().includes(query.toLowerCase())),
       )
-    : MOCK_CHATS;
+    : sessions;
 
   return (
     <View style={styles.root}>
-      {/* Title bar */}
       <SafeAreaView edges={["top"]}>
+        {/* Title bar */}
         <View style={[styles.titleBar, { paddingTop: 8 }]}>
           <Text style={styles.screenTitle}>Chats</Text>
-          <ComposeButton onPress={() => {}} />
+          <Pressable
+            onPress={() => {
+              const id = createSession("New Chat");
+              router.push(`/chat?id=${id}`);
+            }}
+            hitSlop={12}
+            style={({ pressed }) => [styles.composeBtn, pressed && { opacity: 0.65 }]}>
+            <SymbolView
+              name="square.and.pencil"
+              style={styles.composeBtnIcon}
+              tintColor={ios26Colors.accent}
+              type="hierarchical"
+            />
+          </Pressable>
         </View>
 
         {/* Search bar */}
@@ -112,7 +114,6 @@ export default function ChatsScreen() {
         </View>
       </SafeAreaView>
 
-      {/* Content */}
       <ScrollView
         contentInsetAdjustmentBehavior="never"
         contentContainerStyle={[
@@ -121,6 +122,7 @@ export default function ChatsScreen() {
         ]}
         showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (
+          /* ── Empty state ──────────────────────────────────────────────────── */
           <View style={styles.empty}>
             <View style={styles.emptyIconShell}>
               <SymbolView
@@ -132,27 +134,35 @@ export default function ChatsScreen() {
             </View>
             <Text style={styles.emptyTitle}>Ask anything</Text>
             <Text style={styles.emptySub}>
-              Open any product and tap the AI button to start a conversation about
-              ingredients, nutrition, allergens, and more.
+              {query
+                ? "No chats match your search."
+                : "Open a product and tap the AI button, or start a new chat with the compose button above."}
             </Text>
-            <Pressable
-              style={({ pressed }) => [
-                styles.newChatBtn,
-                pressed && { opacity: 0.8 },
-              ]}
-              onPress={() => {}}>
-              <SymbolView
-                name="plus"
-                style={styles.newChatBtnIcon}
-                tintColor="#fff"
-              />
-              <Text style={styles.newChatBtnText}>New chat</Text>
-            </Pressable>
+            {!query ? (
+              <Pressable
+                onPress={() => {
+                  const id = createSession("New Chat");
+                  router.push(`/chat?id=${id}`);
+                }}
+                style={({ pressed }) => [styles.newChatBtn, pressed && { opacity: 0.8 }]}>
+                <SymbolView
+                  name="plus"
+                  style={styles.newChatBtnIcon}
+                  tintColor="#fff"
+                />
+                <Text style={styles.newChatBtnText}>New chat</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : (
+          /* ── Chat list ────────────────────────────────────────────────────── */
           <View style={styles.list}>
-            {filtered.map((item, index) => (
-              <ChatRow key={item.id} item={item} last={index === filtered.length - 1} />
+            {filtered.map((session, index) => (
+              <ChatRow
+                key={session.id}
+                session={session}
+                last={index === filtered.length - 1}
+              />
             ))}
           </View>
         )}
@@ -167,7 +177,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
 
-  // ── Title bar ──────────────────────────────────────────────────────────────
   titleBar: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -181,15 +190,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: -0.5,
   },
-  composeBtn: {
-    paddingBottom: 4,
-  },
-  composeBtnIcon: {
-    width: 26,
-    height: 26,
-  },
+  composeBtn: { paddingBottom: 4 },
+  composeBtnIcon: { width: 26, height: 26 },
 
-  // ── Search bar ─────────────────────────────────────────────────────────────
   searchWrap: {
     flexDirection: "row",
     alignItems: "center",
@@ -201,10 +204,7 @@ const styles = StyleSheet.create({
     backgroundColor: ios26Colors.surfaceElevated,
     gap: 8,
   },
-  searchIcon: {
-    width: 16,
-    height: 16,
-  },
+  searchIcon: { width: 16, height: 16 },
   searchInput: {
     flex: 1,
     color: "#fff",
@@ -212,70 +212,58 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
 
-  // ── Scroll content ─────────────────────────────────────────────────────────
-  scrollContent: {
-    flexGrow: 1,
-  },
+  scrollContent: { flexGrow: 1 },
 
-  // ── List ───────────────────────────────────────────────────────────────────
   list: {
     marginHorizontal: 16,
     backgroundColor: ios26Colors.surface,
     borderRadius: ios26Radii.card,
     overflow: "hidden",
   },
-  chatRow: {
+  row: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 13,
     gap: 13,
   },
-  chatRowBorder: {
+  rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: ios26Colors.separator,
   },
-  chatRowPressed: {
-    backgroundColor: ios26Colors.surfaceElevated,
-  },
-  chatAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  rowPressed: { backgroundColor: ios26Colors.surfaceElevated },
+  rowAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: ios26Colors.accent,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
-  chatAvatarIcon: {
-    width: 20,
-    height: 20,
-  },
-  chatBody: {
-    flex: 1,
-    gap: 3,
-  },
-  chatMeta: {
+  rowAvatarIcon: { width: 20, height: 20 },
+  rowBody: { flex: 1, gap: 3 },
+  rowMeta: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  chatTitle: {
+  rowTitle: {
     fontSize: 15,
     fontWeight: "600",
     color: "#fff",
     flex: 1,
   },
-  chatTs: {
+  rowTs: {
     fontSize: 12,
     color: ios26Colors.textMuted,
     marginLeft: 8,
   },
-  chatPreview: {
+  rowPreview: {
     fontSize: 13,
     color: ios26Colors.textMuted,
   },
 
-  // ── Empty state ────────────────────────────────────────────────────────────
   empty: {
     flex: 1,
     alignItems: "center",
@@ -292,10 +280,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 8,
   },
-  emptyIcon: {
-    width: 36,
-    height: 36,
-  },
+  emptyIcon: { width: 36, height: 36 },
   emptyTitle: {
     fontSize: 22,
     fontWeight: "700",
@@ -318,10 +303,7 @@ const styles = StyleSheet.create({
     borderRadius: ios26Radii.pill,
     backgroundColor: ios26Colors.accent,
   },
-  newChatBtnIcon: {
-    width: 16,
-    height: 16,
-  },
+  newChatBtnIcon: { width: 16, height: 16 },
   newChatBtnText: {
     color: "#fff",
     fontSize: 16,

@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery } from "convex/react";
 
+import { createSession } from "@/stores/chats";
 import {
   createNativeCloseButtonOptions,
   ios26ScrollEdgeEffects,
@@ -210,11 +211,12 @@ export default function ProductSheet() {
   return (
     <>
       <Stack.Screen options={screenOptions} />
+      <View style={s.wrapper}>
       <ScrollView
         style={s.root}
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 48 }}>
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}>
         <View style={s.heroCard}>
           <View style={s.heroImageArea}>
             {product.thumbnailUrl ? (
@@ -463,11 +465,32 @@ export default function ProductSheet() {
           </View>
         ) : null}
       </ScrollView>
+
+      {/* Floating AI button — bottom right */}
+      <Pressable
+        onPress={() => {
+          const id = createSession(product.title ?? barcode, barcode);
+          router.push(`/chat?id=${id}`);
+        }}
+        style={({ pressed }) => [s.aiFab, pressed && s.aiFabPressed]}>
+        <SymbolView
+          name="sparkle"
+          style={s.aiFabIcon}
+          tintColor="#fff"
+          type="hierarchical"
+        />
+      </Pressable>
+
+      </View>
     </>
   );
 }
 
 const s = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: ios26Colors.surface,
+  },
   root: {
     flex: 1,
     backgroundColor: ios26Colors.surface,
@@ -838,5 +861,31 @@ const s = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: ios26Colors.textPrimary,
+  },
+
+  // ── Floating AI button ────────────────────────────────────────────────────
+  aiFab: {
+    position: "absolute",
+    bottom: 28,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: ios26Colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#0A84FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  aiFabPressed: {
+    opacity: 0.82,
+    transform: [{ scale: 0.95 }],
+  },
+  aiFabIcon: {
+    width: 22,
+    height: 22,
   },
 });
