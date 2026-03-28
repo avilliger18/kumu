@@ -9,8 +9,7 @@ export const ResendOTP = Email({
   },
   async sendVerificationRequest({ identifier: email, token }) {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const from =
-      process.env.AUTH_EMAIL_FROM ?? "Kumu <onboarding@resend.dev>";
+    const from = process.env.AUTH_EMAIL_FROM ?? "Kumu <onboarding@resend.dev>";
 
     const { error } = await resend.emails.send({
       from,
