@@ -1,3 +1,4 @@
+import { api } from "@kumu/backend/convex/_generated/api";
 import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
@@ -10,9 +11,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation, useQuery } from "convex/react";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
-import { createSession, useChatSessions, type ChatSession } from "@/stores/chats";
 
 function timeAgo(ms: number): string {
   const diff = Date.now() - ms;
@@ -24,13 +25,10 @@ function timeAgo(ms: number): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function ChatRow({ session, last }: { session: ChatSession; last: boolean }) {
-  const lastMsg = session.messages[session.messages.length - 1];
-  const preview = lastMsg?.text ?? "No messages yet";
-
+function ChatRow({ session, last }: { session: any; last: boolean }) {
   return (
     <Pressable
-      onPress={() => router.push(`/chat?id=${session.id}`)}
+      onPress={() => router.push(`/chat?id=${session._id}`)}
       style={({ pressed }) => [
         styles.row,
         !last && styles.rowBorder,
@@ -52,7 +50,7 @@ function ChatRow({ session, last }: { session: ChatSession; last: boolean }) {
           <Text style={styles.rowTs}>{timeAgo(session.updatedAt)}</Text>
         </View>
         <Text style={styles.rowPreview} numberOfLines={1}>
-          {preview}
+          {session.lastMessageText || "No messages yet"}
         </Text>
       </View>
     </Pressable>
@@ -61,16 +59,22 @@ function ChatRow({ session, last }: { session: ChatSession; last: boolean }) {
 
 export default function ChatsScreen() {
   const insets = useSafeAreaInsets();
-  const sessions = useChatSessions();
+  const sessions = useQuery(api.chats.getUserSessions) ?? [];
+  const createSession = useMutation(api.chats.createSession);
   const [query, setQuery] = useState("");
 
   const filtered = query.trim()
     ? sessions.filter(
-        (s) =>
+        (s: any) =>
           s.title.toLowerCase().includes(query.toLowerCase()) ||
-          s.messages.some((m) => m.text.toLowerCase().includes(query.toLowerCase())),
+          s.lastMessageText?.toLowerCase().includes(query.toLowerCase()),
       )
     : sessions;
+
+  const startNewChat = async () => {
+    const id = await createSession({ title: "New Chat" });
+    router.push(`/chat?id=${id}`);
+  };
 
   return (
     <View style={styles.root}>
@@ -79,10 +83,7 @@ export default function ChatsScreen() {
         <View style={[styles.titleBar, { paddingTop: 8 }]}>
           <Text style={styles.screenTitle}>Chats</Text>
           <Pressable
-            onPress={() => {
-              const id = createSession("New Chat");
-              router.push(`/chat?id=${id}`);
-            }}
+            onPress={startNewChat}
             hitSlop={12}
             style={({ pressed }) => [styles.composeBtn, pressed && { opacity: 0.65 }]}>
             <SymbolView
@@ -116,13 +117,9 @@ export default function ChatsScreen() {
 
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + 48 },
-        ]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
         showsVerticalScrollIndicator={false}>
         {filtered.length === 0 ? (
-          /* ── Empty state ──────────────────────────────────────────────────── */
           <View style={styles.empty}>
             <View style={styles.emptyIconShell}>
               <SymbolView
@@ -140,26 +137,18 @@ export default function ChatsScreen() {
             </Text>
             {!query ? (
               <Pressable
-                onPress={() => {
-                  const id = createSession("New Chat");
-                  router.push(`/chat?id=${id}`);
-                }}
+                onPress={startNewChat}
                 style={({ pressed }) => [styles.newChatBtn, pressed && { opacity: 0.8 }]}>
-                <SymbolView
-                  name="plus"
-                  style={styles.newChatBtnIcon}
-                  tintColor="#fff"
-                />
+                <SymbolView name="plus" style={styles.newChatBtnIcon} tintColor="#fff" />
                 <Text style={styles.newChatBtnText}>New chat</Text>
               </Pressable>
             ) : null}
           </View>
         ) : (
-          /* ── Chat list ────────────────────────────────────────────────────── */
           <View style={styles.list}>
-            {filtered.map((session, index) => (
+            {filtered.map((session: any, index: number) => (
               <ChatRow
-                key={session.id}
+                key={session._id}
                 session={session}
                 last={index === filtered.length - 1}
               />
@@ -172,10 +161,7 @@ export default function ChatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
+  root: { flex: 1, backgroundColor: "#000" },
 
   titleBar: {
     flexDirection: "row",
@@ -205,12 +191,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchIcon: { width: 16, height: 16 },
-  searchInput: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 15,
-    paddingVertical: 0,
-  },
+  searchInput: { flex: 1, color: "#fff", fontSize: 15, paddingVertical: 0 },
 
   scrollContent: { flexGrow: 1 },
 
@@ -248,21 +229,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  rowTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#fff",
-    flex: 1,
-  },
-  rowTs: {
-    fontSize: 12,
-    color: ios26Colors.textMuted,
-    marginLeft: 8,
-  },
-  rowPreview: {
-    fontSize: 13,
-    color: ios26Colors.textMuted,
-  },
+  rowTitle: { fontSize: 15, fontWeight: "600", color: "#fff", flex: 1 },
+  rowTs: { fontSize: 12, color: ios26Colors.textMuted, marginLeft: 8 },
+  rowPreview: { fontSize: 13, color: ios26Colors.textMuted },
 
   empty: {
     flex: 1,
@@ -281,18 +250,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyIcon: { width: 36, height: 36 },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#fff",
-    letterSpacing: -0.3,
-  },
-  emptySub: {
-    fontSize: 15,
-    color: ios26Colors.textMuted,
-    textAlign: "center",
-    lineHeight: 22,
-  },
+  emptyTitle: { fontSize: 22, fontWeight: "700", color: "#fff", letterSpacing: -0.3 },
+  emptySub: { fontSize: 15, color: ios26Colors.textMuted, textAlign: "center", lineHeight: 22 },
   newChatBtn: {
     marginTop: 8,
     flexDirection: "row",
@@ -304,9 +263,5 @@ const styles = StyleSheet.create({
     backgroundColor: ios26Colors.accent,
   },
   newChatBtnIcon: { width: 16, height: 16 },
-  newChatBtnText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+  newChatBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });

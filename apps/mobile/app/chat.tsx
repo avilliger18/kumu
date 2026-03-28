@@ -1,3 +1,5 @@
+import { api } from "@kumu/backend/convex/_generated/api";
+import type { Id } from "@kumu/backend/convex/_generated/dataModel";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useRef, useState } from "react";
@@ -12,9 +14,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMutation, useQuery } from "convex/react";
 
 import { ios26Colors, ios26Radii } from "@/constants/ios26";
-import { addMessage, getSession, useChatSessions, type ChatMessage } from "@/stores/chats";
 
 const SUGGESTIONS = [
   "What are the main ingredients?",
@@ -53,24 +55,25 @@ export default function ChatScreen() {
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-  // Re-render when store changes
-  useChatSessions();
+  const sessionId = id as Id<"chatSessions">;
+  const session = useQuery(api.chats.getSession, sessionId ? { sessionId } : "skip");
+  const addMessage = useMutation(api.chats.addMessage);
 
-  const session = id ? getSession(id) : null;
   const messages = session?.messages ?? [];
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || !id) return;
+    if (!trimmed || !sessionId) return;
 
     setShowSuggestions(false);
     setInput("");
 
-    addMessage(id, { id: String(Date.now()), role: "user", text: trimmed });
+    await addMessage({ sessionId, role: "user", text: trimmed });
 
-    setTimeout(() => {
-      addMessage(id, {
-        id: String(Date.now() + 1),
+    // Placeholder AI reply
+    setTimeout(async () => {
+      await addMessage({
+        sessionId,
         role: "ai",
         text: "AI responses coming soon — stay tuned!",
       });
@@ -103,9 +106,9 @@ export default function ChatScreen() {
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
           {messages.map((m) =>
             m.role === "ai" ? (
-              <AiMessage key={m.id} text={m.text} />
+              <AiMessage key={m._id} text={m.text} />
             ) : (
-              <UserMessage key={m.id} text={m.text} />
+              <UserMessage key={m._id} text={m.text} />
             ),
           )}
 
@@ -153,7 +156,6 @@ export default function ChatScreen() {
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: ios26Colors.surface },
-
   messages: { flex: 1 },
   messagesContent: {
     paddingHorizontal: 16,

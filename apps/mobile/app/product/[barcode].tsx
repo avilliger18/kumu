@@ -15,7 +15,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery } from "convex/react";
 
-import { createSession } from "@/stores/chats";
 import {
   createNativeCloseButtonOptions,
   ios26ScrollEdgeEffects,
@@ -105,6 +104,7 @@ export default function ProductSheet() {
   const source = params.source;
   const insets = useSafeAreaInsets();
   const recordScan = useMutation(api.products.recordScan);
+  const createChatSession = useMutation(api.chats.createSession);
   const recorded = useRef<string | null>(null);
 
   const result = useQuery(
@@ -468,8 +468,11 @@ export default function ProductSheet() {
 
       {/* Floating AI button — bottom right */}
       <Pressable
-        onPress={() => {
-          const id = createSession(product.title ?? barcode, barcode);
+        onPress={async () => {
+          const id = await createChatSession({
+            title: product.title ?? barcode,
+            productBarcode: barcode,
+          });
           router.push(`/chat?id=${id}`);
         }}
         style={({ pressed }) => [s.aiFab, pressed && s.aiFabPressed]}>
