@@ -371,6 +371,35 @@ export const getOpenAlertsForProduct = query({
   },
 });
 
+export const updateProducer = mutation({
+  args: {
+    companyName: v.string(),
+    displayName: v.string(),
+    countryCode: v.optional(v.string()),
+    website: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    const producer = await ctx.db
+      .query("producers")
+      .withIndex("by_owner", (q) =>
+        q.eq("ownerTokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique();
+    if (!producer) throw new Error("No producer profile found.");
+
+    await ctx.db.patch(producer._id, {
+      name: args.companyName.trim(),
+      displayName: args.displayName.trim(),
+      countryCode: args.countryCode?.trim() || undefined,
+      website: args.website?.trim() || undefined,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const deleteSupplierProduct = mutation({
   args: { productId: v.id("products") },
   handler: async (ctx, args) => {

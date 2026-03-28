@@ -6,6 +6,7 @@ import { useState } from "react";
 import Image from "next/image";
 import circle from "../../../public/circle-bubble.png";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
 
 export default function SignInPage() {
   const { signIn } = useAuthActions();
@@ -115,10 +116,10 @@ export default function SignInPage() {
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
         {/* Button */}
-        <button
+        <Button
           onClick={step === "email" ? handleSendOTP : handleVerifyOTP}
           disabled={loading}
-          className="w-full py-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary transition disabled:opacity-60 flex items-center justify-center"
+          className="w-full h-12 font-semibold"
         >
           {loading ? (
             <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -127,7 +128,7 @@ export default function SignInPage() {
           ) : (
             "Verify Code"
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );
