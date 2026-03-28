@@ -9,7 +9,7 @@ Lieferkettenkontext und einem Supplier-Portal fuer Produkt- und Alert-Pflege.
 
 Kumu besteht aktuell aus drei Kernteilen:
 
-- Web-App fuer Supplier-Workflows und die veroeffentlichte Demo
+- Web-App fuer Supplier-Workflows und die veröffentlichte Demo
 - Mobile App fuer Scan, Produktansicht, Verlauf und Chat
 - Convex-Backend fuer Auth, Datenmodell, Alerts, Notifications und Chats
 
@@ -21,7 +21,7 @@ Barcode-Ergebnisse jedoch absichtlich gemockt und liefern nur Testresultate.
 
 Web-Demo: [https://kumu-web.vercel.app/](https://kumu-web.vercel.app/)
 
-Hinweis: Die veroeffentlichte Seite startet aktuell mit einem Sign-in-Screen.
+Hinweis: Die veröffentlichte Seite startet aktuell mit einem Sign-in-Screen.
 
 ## Wichtiger Demo-Hinweis
 
@@ -58,11 +58,11 @@ Hinweis: Die veroeffentlichte Seite startet aktuell mit einem Sign-in-Screen.
 
 ## Dokumentation
 
-| Datei                                                      | Inhalt                                                               |
-| ---------------------------------------------------------- | -------------------------------------------------------------------- |
-| [Produktueberblick](docs/produktueberblick.md)             | Problem, Zielgruppen, Nutzen und aktueller Produktumfang             |
-| [Anwenderguide](docs/anwenderguide.md)                     | OTP-Login, Scan-Flow, Produktansicht, Verlauf, Chat und Profil       |
-| [Lieferantenguide](docs/lieferantenguide.md)               | Firmenprofil, Produktpflege, Supply-Chain-Daten und Alerts           |
-| [Technik und Betrieb](docs/technik-und-betrieb.md)         | Monorepo, Frontends, Backend, CI und Deployment                      |
-| [Testing und Demo](docs/testing-und-demo.md)               | Testansatz, Live-Demo und Demo-Grenzen                               |
-| [Bewertungsargumentation](docs/bewertungsargumentation.md) | Begruendung fuer Reifegrad, Architektur, UX, Doku und Code-Qualitaet |
+| Datei                                                               | Inhalt                                                         |
+| ------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [Produktueberblick](docs/produktueberblick.md)                      | Problem, Zielgruppen, Nutzen und aktueller Produktumfang       |
+| [Anwenderguide](docs/anwenderguide.md)                              | OTP-Login, Scan-Flow, Produktansicht, Verlauf, Chat und Profil |
+| [Lieferantenguide](docs/lieferantenguide.md)                        | Firmenprofil, Produktpflege, Supply-Chain-Daten und Alerts     |
+| [Technik und Betrieb](docs/technik-und-betrieb.md)                  | Monorepo, Frontends, Backend, CI und Deployment                |
+| [Testing und Demo](docs/testing-und-demo.md)                        | Testansatz, Live-Demo und Demo-Grenzen                         |
+| [Mockups](https://www.figma.com/design/cMDLce6WDp4Me1Ia4mWEhd/Kumu) | Figma-Mockups                                                  |

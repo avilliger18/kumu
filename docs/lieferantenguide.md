@@ -2,7 +2,7 @@
 
 ## Einstieg in die Web-App
 
-Die veroeffentlichte Web-App ist unter
+Die veröffentlichte Web-App ist unter
 [https://kumu-web.vercel.app/](https://kumu-web.vercel.app/) erreichbar und
 startet aktuell mit einem Sign-in-Screen.
 
@@ -27,7 +27,7 @@ Funktion beschrieben werden.
 
 ## Produkte
 
-Supplier koennen Produkte anlegen, bearbeiten und loeschen.
+Supplier koennen Produkte anlegen, bearbeiten und löschen.
 
 Aktuell pflegbare Felder:
 
@@ -70,7 +70,7 @@ Aktuell relevante Felder:
 - Fehlerbeschreibung
 - Severity: `low`, `medium`, `high`
 
-Nach dem Erstellen bleibt ein Alert offen, bis er explizit als geloest markiert
+Nach dem Erstellen bleibt ein Alert offen, bis er explizit als gelöst markiert
 wird.
 
 ## Was aktuell nicht im Web-Portal liegt

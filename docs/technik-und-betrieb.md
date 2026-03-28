@@ -23,7 +23,7 @@ kumu/
 ### Web
 
 - Framework: Next.js 16
-- Einsatz: Supplier-Portal und veroeffentlichte Web-Demo
+- Einsatz: Supplier-Portal und veröffentlichte Web-Demo
 - Hosting: Vercel
 
 ### Mobile

@@ -2,7 +2,7 @@
 
 ## Live-Demo
 
-Die veroeffentlichte Web-App ist hier erreichbar:
+Die veröffentlichte Web-App ist hier erreichbar:
 
 [https://kumu-web.vercel.app/](https://kumu-web.vercel.app/)
 

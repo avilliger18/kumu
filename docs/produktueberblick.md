@@ -2,8 +2,8 @@
 
 ## Problem
 
-Produktinformationen sind fuer Anwender oft verteilt, schwer verstaendlich und
-nicht direkt mit Rueckmeldungen aus der Lieferkette verbunden. Gleichzeitig
+Produktinformationen sind fuer Anwender oft verteilt, schwer verständlich und
+nicht direkt mit Rückmeldungen aus der Lieferkette verbunden. Gleichzeitig
 brauchen Supplier eine einfache Moeglichkeit, Produktdaten, Lieferketteninfos
 und Warnungen zentral zu pflegen.
 
