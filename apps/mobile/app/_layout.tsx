@@ -1,4 +1,4 @@
-import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
@@ -15,7 +15,7 @@ export default function RootLayout() {
   return (
     <ConvexClientProvider>
       <AuthProvider>
-        <ThemeProvider value={DarkTheme}>
+        <ThemeProvider value={DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -29,7 +29,7 @@ export default function RootLayout() {
               }}
             />
           </Stack>
-          <StatusBar style="light" />
+          <StatusBar style="dark" />
         </ThemeProvider>
       </AuthProvider>
     </ConvexClientProvider>

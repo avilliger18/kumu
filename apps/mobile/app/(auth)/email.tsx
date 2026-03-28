@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ios26Colors, ios26Radii } from "@/constants/ios26";
+
 export default function EmailScreen() {
   const { signIn } = useAuthActions();
   const [email, setEmail] = useState("");
@@ -57,7 +59,7 @@ export default function EmailScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
-                placeholderTextColor="#3C3C3E"
+                placeholderTextColor={ios26Colors.textMuted}
                 value={email}
                 onChangeText={(t) => {
                   setEmail(t);
@@ -82,7 +84,7 @@ export default function EmailScreen() {
               onPress={handleContinue}
               disabled={!isValid || loading}>
               {loading ? (
-                <ActivityIndicator color="#000" size="small" />
+                <ActivityIndicator color={ios26Colors.surface} size="small" />
               ) : (
                 <Text
                   style={[
@@ -103,7 +105,7 @@ export default function EmailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: ios26Colors.bg,
   },
   inner: {
     flex: 1,
@@ -121,52 +123,52 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: ios26Colors.textPrimary,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 17,
-    color: "#8E8E93",
+    color: ios26Colors.textMuted,
     lineHeight: 24,
   },
   form: {
     gap: 16,
   },
   inputWrapper: {
-    borderRadius: 14,
-    backgroundColor: "#1C1C1E",
+    borderRadius: ios26Radii.md,
+    backgroundColor: ios26Colors.surface,
     paddingHorizontal: 18,
     paddingVertical: 4,
     borderWidth: 1,
-    borderColor: "#2C2C2E",
+    borderColor: "#E3E3E3",
   },
   input: {
     height: 52,
     fontSize: 17,
-    color: "#FFFFFF",
+    color: ios26Colors.textPrimary,
   },
   errorText: {
     fontSize: 14,
-    color: "#FF453A",
+    color: ios26Colors.danger,
     paddingHorizontal: 4,
   },
   button: {
     height: 56,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    borderRadius: ios26Radii.md,
+    backgroundColor: ios26Colors.accent,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: "#1C1C1E",
+    backgroundColor: "#E3E3E3",
   },
   buttonText: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#000000",
+    color: "#FFFFFF",
   },
   buttonTextDisabled: {
-    color: "#3C3C3E",
+    color: ios26Colors.textMuted,
   },
 });

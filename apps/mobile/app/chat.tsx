@@ -89,7 +89,7 @@ export default function ChatScreen() {
         options={{
           title: session?.title ?? "Chat",
           headerStyle: { backgroundColor: ios26Colors.surface },
-          headerTintColor: "#fff",
+          headerTintColor: ios26Colors.textPrimary,
           headerShadowVisible: false,
           headerBackButtonDisplayMode: "minimal",
         }}
@@ -195,7 +195,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  userBubbleText: { color: "#fff", fontSize: 15, lineHeight: 22 },
+  userBubbleText: { color: "#FFFFFF", fontSize: 15, lineHeight: 22 },
 
   suggestions: {
     flexDirection: "row",
@@ -232,7 +232,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 10,
-    color: "#fff",
+    color: ios26Colors.textPrimary,
     fontSize: 15,
     maxHeight: 120,
     lineHeight: 20,

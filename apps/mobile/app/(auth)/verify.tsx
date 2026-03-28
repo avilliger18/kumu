@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ios26Colors, ios26Radii } from "@/constants/ios26";
+
 const CODE_LENGTH = 6;
 
 export default function VerifyScreen() {
@@ -115,7 +117,7 @@ export default function VerifyScreen() {
                       error ? styles.codeBoxError : null,
                     ]}>
                     {loading && i === 0 ? (
-                      <ActivityIndicator color="#8E8E93" size="small" />
+                      <ActivityIndicator color={ios26Colors.textMuted} size="small" />
                     ) : (
                       <Text style={styles.codeChar}>{char || ""}</Text>
                     )}
@@ -130,7 +132,7 @@ export default function VerifyScreen() {
               <Text style={styles.resendLabel}>Didn't get it? </Text>
               <Pressable onPress={handleResend} disabled={resending}>
                 {resending ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={ios26Colors.accent} size="small" />
                 ) : (
                   <Text style={styles.resendLink}>Resend code</Text>
                 )}
@@ -146,7 +148,7 @@ export default function VerifyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: ios26Colors.bg,
   },
   inner: {
     flex: 1,
@@ -167,22 +169,22 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 17,
-    color: "#8E8E93",
+    color: ios26Colors.accent,
   },
   title: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: ios26Colors.textPrimary,
     letterSpacing: -0.5,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 17,
-    color: "#8E8E93",
+    color: ios26Colors.textMuted,
     lineHeight: 26,
   },
   emailHighlight: {
-    color: "#FFFFFF",
+    color: ios26Colors.textPrimary,
     fontWeight: "500",
   },
   form: {
@@ -204,33 +206,33 @@ const styles = StyleSheet.create({
   codeBox: {
     width: 48,
     height: 60,
-    borderRadius: 12,
-    backgroundColor: "#1C1C1E",
+    borderRadius: ios26Radii.sm,
+    backgroundColor: ios26Colors.surface,
     borderWidth: 1.5,
-    borderColor: "#2C2C2E",
+    borderColor: "#E3E3E3",
     alignItems: "center",
     justifyContent: "center",
   },
   codeBoxActive: {
-    borderColor: "#FFFFFF",
+    borderColor: ios26Colors.accent,
   },
   codeBoxFilled: {
-    borderColor: "#48484A",
-    backgroundColor: "#2C2C2E",
+    borderColor: "#CCDDEF",
+    backgroundColor: "#EEF2F9",
   },
   codeBoxError: {
-    borderColor: "#FF453A",
-    backgroundColor: "#1C0A09",
+    borderColor: ios26Colors.danger,
+    backgroundColor: "#FFF0F0",
   },
   codeChar: {
     fontSize: 26,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: ios26Colors.textPrimary,
     letterSpacing: 0,
   },
   errorText: {
     fontSize: 14,
-    color: "#FF453A",
+    color: ios26Colors.danger,
     textAlign: "center",
   },
   resendRow: {
@@ -240,11 +242,11 @@ const styles = StyleSheet.create({
   },
   resendLabel: {
     fontSize: 15,
-    color: "#8E8E93",
+    color: ios26Colors.textMuted,
   },
   resendLink: {
     fontSize: 15,
-    color: "#FFFFFF",
+    color: ios26Colors.accent,
     fontWeight: "500",
   },
 });

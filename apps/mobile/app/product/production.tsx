@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#fff",
+    color: ios26Colors.textPrimary,
     letterSpacing: -0.3,
     marginBottom: 10,
   },

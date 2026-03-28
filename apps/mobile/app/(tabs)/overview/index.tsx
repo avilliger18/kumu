@@ -176,7 +176,7 @@ export default function OverviewScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: ios26Colors.bg,
   },
   scrollView: {
     flex: 1,
@@ -195,21 +195,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#fff",
+    color: ios26Colors.textPrimary,
     letterSpacing: -0.5,
   },
   avatar: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#5E5CE6",
+    backgroundColor: ios26Colors.accent,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#fff",
+    color: "#FFFFFF",
     letterSpacing: 0.4,
   },
   searchWrap: {
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: "#fff",
+    color: ios26Colors.textPrimary,
     paddingVertical: 0,
   },
   list: {
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#fff",
+    color: ios26Colors.textPrimary,
   },
   rowSub: {
     fontSize: 13,
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#fff",
+    color: ios26Colors.textPrimary,
   },
   emptySub: {
     fontSize: 14,

@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#5E5CE6",
+    backgroundColor: ios26Colors.accent,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#fff",
+    color: "#FFFFFF",
     letterSpacing: 1,
   },
   name: {

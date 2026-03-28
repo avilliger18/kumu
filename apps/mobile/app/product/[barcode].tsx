@@ -774,7 +774,7 @@ const s = StyleSheet.create({
   productionTitle: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#fff",
+    color: ios26Colors.textPrimary,
   },
   productionSub: {
     fontSize: 13,

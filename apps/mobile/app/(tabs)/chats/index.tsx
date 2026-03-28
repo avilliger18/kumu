@@ -161,7 +161,7 @@ export default function ChatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#000" },
+  root: { flex: 1, backgroundColor: ios26Colors.bg },
 
   titleBar: {
     flexDirection: "row",
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#fff",
+    color: ios26Colors.textPrimary,
     letterSpacing: -0.5,
   },
   composeBtn: { paddingBottom: 4 },
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchIcon: { width: 16, height: 16 },
-  searchInput: { flex: 1, color: "#fff", fontSize: 15, paddingVertical: 0 },
+  searchInput: { flex: 1, color: ios26Colors.textPrimary, fontSize: 15, paddingVertical: 0 },
 
   scrollContent: { flexGrow: 1 },
 
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  rowTitle: { fontSize: 15, fontWeight: "600", color: "#fff", flex: 1 },
+  rowTitle: { fontSize: 15, fontWeight: "600", color: ios26Colors.textPrimary, flex: 1 },
   rowTs: { fontSize: 12, color: ios26Colors.textMuted, marginLeft: 8 },
   rowPreview: { fontSize: 13, color: ios26Colors.textMuted },
 
@@ -244,13 +244,13 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "rgba(10,132,255,0.12)",
+    backgroundColor: "rgba(21,46,79,0.08)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   emptyIcon: { width: 36, height: 36 },
-  emptyTitle: { fontSize: 22, fontWeight: "700", color: "#fff", letterSpacing: -0.3 },
+  emptyTitle: { fontSize: 22, fontWeight: "700", color: ios26Colors.textPrimary, letterSpacing: -0.3 },
   emptySub: { fontSize: 15, color: ios26Colors.textMuted, textAlign: "center", lineHeight: 22 },
   newChatBtn: {
     marginTop: 8,

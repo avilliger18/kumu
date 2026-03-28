@@ -1,32 +1,32 @@
 /**
- * iOS 26 dark-mode design tokens.
- * Colors match Apple's UIKit system palette (dark appearance).
+ * Light-mode design tokens matched to the web app theme.
+ * Colors derived from apps/web/src/app/globals.css (light :root vars).
  */
 export const ios26Colors = {
   // ── Backgrounds ──────────────────────────────────────────────────────────
-  bg: "#000000",
-  surface: "#1C1C1E",           // systemGray6 dark
-  surfaceElevated: "#2C2C2E",   // systemGray5 dark
-  surfaceHigh: "#3A3A3C",       // systemGray4 dark
-  sheet: "#1C1C1E",
+  bg: "#F5F6FA",                // web --background  oklch(0.9785 0.0045 258.3245)
+  surface: "#FFFFFF",           // web --card        oklch(1 0 0)
+  surfaceElevated: "#EEF2F9",   // slightly elevated light blue-tinted surface
+  surfaceHigh: "#E3E8F0",       // further elevated
+  sheet: "#FFFFFF",
 
   // ── Text ─────────────────────────────────────────────────────────────────
-  textPrimary: "#FFFFFF",
-  textSecondary: "#EBEBF599",   // label / 60 %
-  textMuted: "#8E8E93",         // systemGray
+  textPrimary: "#152E4F",       // web --foreground  oklch(0.3421 0.069 251.7764) dark navy
+  textSecondary: "#152E4F99",   // 60% opacity navy
+  textMuted: "#6A6A6A",         // web --muted-foreground oklch(0.556 0 0)
 
   // ── Separators ───────────────────────────────────────────────────────────
-  separator: "rgba(84,84,88,0.65)",
-  separatorStrong: "rgba(84,84,88,0.36)",
+  separator: "rgba(21,46,79,0.12)",
+  separatorStrong: "rgba(21,46,79,0.08)",
 
   // ── Accents ──────────────────────────────────────────────────────────────
-  accent: "#0A84FF",
-  accentStrong: "#0A84FF",
+  accent: "#152E4F",            // web --primary dark navy
+  accentStrong: "#152E4F",
 
   // ── Semantic ─────────────────────────────────────────────────────────────
-  success: "#30D158",
-  warning: "#FF9F0A",
-  danger: "#FF453A",
+  success: "#1A9E5A",
+  warning: "#E6AE00",
+  danger: "#E6000F",            // web --destructive oklch(0.577 0.245 27.325)
 } as const;
 
 export const ios26Radii = {
