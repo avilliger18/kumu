@@ -1,6 +1,6 @@
 import { convexAuth } from "@convex-dev/auth/server";
-import { ConsoleOTP } from "./OTP";
+import { ResendOTP } from "./OTP";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [ConsoleOTP],
+  providers: [ResendOTP],
 });
